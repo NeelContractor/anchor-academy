@@ -10,6 +10,7 @@ import { LessonCard } from "./LessonCard";
 import { ProgressBar } from "./ProgressBar";
 import { ChapterCard } from "./ChapterCard";
 import { chapters } from "../data/lessons";
+import { WobbleCardDemo } from "./WobbleCard";
 
 export default function Dashboard() {
     const [currentView, setCurrentView] = useState<'dashboard' | "chapter" | "lesson">("dashboard");
@@ -99,8 +100,8 @@ export default function Dashboard() {
                                 {selectedChapter.icon}
                             </div>
                             <div>
-                                <h1 className="text-4xl font-bold bg-gradient-galaxy bg-clip-text text-transparent font-orbitron">
-                                {selectedChapter.title}
+                                <h1 className="text-4xl font-bold bg-gradient-galaxy bg-clip-text font-orbitron">
+                                    {selectedChapter.title}
                                 </h1>
                                 <p className="text-xl text-muted-foreground">{selectedChapter.description}</p>
                             </div>
@@ -129,7 +130,7 @@ export default function Dashboard() {
             <div className="container mx-auto px-4 py-16">
                 <div className="text-center mb-12">
                     <h1 className="text-6xl font-bold mb-6 font-orbitron">
-                        <span className="bg-gradient-to-r from-white to-gray-300 inline-block text-transparent bg-clip-text font-[Orbitron]">Anchor Academy</span> 🚀
+                        <span className="bg-gradient-to-r from-white to-gray-300 inline-block text-transparent bg-clip-text">Anchor Academy</span> 🚀
                     </h1>
                     <p className="text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto font-space">
                         Embark on an interstellar journey to master Anchor development! Learn Solana programming 
@@ -229,36 +230,8 @@ export default function Dashboard() {
             </div>
 
             {/* Features */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="p-6 text-center border-primary/20 hover:border-primary/40 transition-colors">
-                    <div className="w-12 h-12 bg-gradient-galaxy rounded-full flex items-center justify-center text-2xl mx-auto mb-4 shadow-cosmic">
-                        💻
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2 text-foreground">Stellar Code Lab</h3>
-                    <p className="text-muted-foreground">
-                        Write and test real Rust code with our advanced space-grade editor
-                    </p>
-                </Card>
-                
-                <Card className="p-6 text-center border-accent/20 hover:border-accent/40 transition-colors">
-                    <div className="w-12 h-12 bg-gradient-nebula rounded-full flex items-center justify-center text-2xl mx-auto mb-4 shadow-nebula">
-                        🏆
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2 text-foreground">Mission Progress</h3>
-                    <p className="text-muted-foreground">
-                        Earn cosmic XP, unlock stellar badges, and track your galactic journey
-                    </p>
-                </Card>
-                
-                <Card className="p-6 text-center border-success/20 hover:border-success/40 transition-colors">
-                    <div className="w-12 h-12 bg-success rounded-full flex items-center justify-center text-2xl mx-auto mb-4 text-success-foreground">
-                        🎯
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2 text-foreground">Interstellar Practice</h3>
-                    <p className="text-muted-foreground">
-                        Learn by building real Anchor programs and launching Solana applications
-                    </p>
-                </Card>
+            <div>
+                <WobbleCardDemo />
             </div>
         </div>
     </div>

@@ -73,7 +73,7 @@ export const LessonView = ({ lesson, onBack, onComplete }: LessonViewProps) => {
         <div className="container mx-auto px-4 py-8">
             {/* Lesson Title */}
             <div className="mb-8">
-                <h1 className="text-4xl font-bold mb-4 bg-gradient-ocean bg-clip-text text-transparent">
+                <h1 className="text-4xl font-bold mb-4 bg-gradient-ocean bg-clip-text ">
                     {lesson.title}
                 </h1>
                 <p className="text-xl text-muted-foreground">{lesson.description}</p>
@@ -128,7 +128,7 @@ export const LessonView = ({ lesson, onBack, onComplete }: LessonViewProps) => {
                             <div className="mt-8 pt-6 border-t border-primary/20">
                                 <Button 
                                     onClick={() => setCurrentTab('code')}
-                                    className="bg-gradient-ocean hover:bg-primary/90 text-primary-foreground shadow-ocean"
+                                    className="bg-gradient-ocean hover:bg-primary/90 text-primary-foreground shadow-ocean bg-white"
                                 >
                                     Start Coding Challenge 🚀
                                 </Button>

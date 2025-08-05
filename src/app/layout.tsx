@@ -3,11 +3,7 @@ import './globals.css'
 import { AppProviders } from '@/components/app-providers'
 import { AppLayout } from '@/components/app-layout'
 import React from 'react'
-import { Orbitron, Space_Grotesk } from 'next/font/google'
-
-const orbitron = Orbitron({
-  subsets: ['latin'],
-})
+import { Space_Grotesk } from 'next/font/google'
 
 const space_grotesk = Space_Grotesk({
   subsets: ['latin'],

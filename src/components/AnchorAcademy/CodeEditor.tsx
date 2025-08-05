@@ -97,10 +97,10 @@ export const CodeEditor = ({ initialCode, solution, tests, onComplete, hints }: 
         <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
                 <Badge variant="outline" className="bg-primary/10">
-                    <span className="text-xs">⚓ Rust Editor</span>
+                    <span className="text-xs">🔭 Rust Editor</span>
                 </Badge>
                 <Badge variant="outline" className="bg-accent/10">
-                    <span className="text-xs">🏴‍☠️ Pirate Mode</span>
+                    <span className="text-xs">👽 Space Mode</span>
                 </Badge>
             </div>
             
@@ -155,7 +155,7 @@ export const CodeEditor = ({ initialCode, solution, tests, onComplete, hints }: 
                         value={code}
                         onChange={(value) => setCode(value || '')}
                         onMount={handleEditorMount}
-                        theme="vs-light"
+                        theme="vs-dark"
                         options={{
                             minimap: { enabled: false },
                             fontSize: 14,
@@ -174,11 +174,11 @@ export const CodeEditor = ({ initialCode, solution, tests, onComplete, hints }: 
             <Card className="flex flex-col border-muted/50">
                 <div className="p-4 border-b bg-muted/20">
                     <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-sm">🏴‍☠️ Pirate Console</h3>
+                        <h3 className="font-semibold text-sm">👽 Space Console</h3>
                         <Button 
                             onClick={runCode} 
                             disabled={isRunning}
-                            className="bg-gradient-ocean hover:bg-primary/90 text-primary-foreground shadow-ocean"
+                            className="bg-gradient-ocean hover:bg-primary/90 text-primary-foreground shadow-ocean bg-white"
                         >
                             {isRunning ? '⚡ Running...' : '▶️ Run Code'}
                         </Button>
