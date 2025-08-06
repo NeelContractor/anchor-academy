@@ -716,11 +716,7 @@ export const chapters: Chapter[] = [
     #[derive(Accounts)]
     #[instruction(station_name: String)]
     pub struct EstablishStation<'info> {
-        #[account(
-            init,
-            payer = commander,
-            space = 90 // 8 + 36 + 32 + 2 + 8 + 1 + 3
-        )]
+        #[account(init, payer = commander, space = 90)]
         pub space_station: Account<'info, SpaceStation>,
     
         #[account(mut)]
