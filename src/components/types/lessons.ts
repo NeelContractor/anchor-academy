@@ -1,3 +1,10 @@
+export interface Tests {
+    name: string,
+    description: string,
+    check: string,
+    points: number
+}
+
 export interface Lesson {
     id: string;
     title: string;
@@ -11,7 +18,7 @@ export interface Lesson {
     code: {
       initial: string;
       solution: string;
-      tests: string[];
+      tests: string[] | Tests[];
     };
     hints: string[];
     completed: boolean;

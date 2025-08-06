@@ -11,6 +11,8 @@ import { ProgressBar } from "./ProgressBar";
 import { ChapterCard } from "./ChapterCard";
 import { chapters } from "../data/lessons";
 import { WobbleCardDemo } from "./WobbleCard";
+import { ThemeSelect } from "../theme-select";
+import { useTheme } from "next-themes";
 
 export default function Dashboard() {
     const [currentView, setCurrentView] = useState<'dashboard' | "chapter" | "lesson">("dashboard");
@@ -24,6 +26,7 @@ export default function Dashboard() {
         streak: 3,
         lastActiveDate: new Date().toISOString()
     });
+    const { theme } = useTheme();
 
     //calculate user level
     const userLevel = Math.floor(userProgress.xp / 100) + 1;
@@ -86,14 +89,17 @@ export default function Dashboard() {
                 <div className="container mx-auto px-4 py-8">
                     {/* Chapter Header */}
                     <div className="mb-8">
-                        <Button 
-                            variant="ghost" 
-                            onClick={() => setCurrentView('dashboard')}
-                            className="mb-4 hover:bg-primary/10"
-                        >
-                            <ArrowLeft className="w-4 h-4 mr-2" />
-                            Back to Dashboard
-                        </Button>
+                        <div className="flex justify-between gap-5">
+                            <Button 
+                                variant="ghost" 
+                                onClick={() => setCurrentView('dashboard')}
+                                className="mb-4 hover:bg-primary/10"
+                            >
+                                <ArrowLeft className="w-4 h-4 mr-2" />
+                                Back to Dashboard
+                            </Button>
+                            <ThemeSelect />
+                        </div>
                         
                         <div className="flex items-center gap-4 mb-4">
                             <div className={`w-16 h-16 rounded-full ${selectedChapter.color} flex items-center justify-center text-3xl shadow-cosmic`}>
@@ -123,6 +129,7 @@ export default function Dashboard() {
         );
       }
 
+      console.log(theme);
     return (
         <div className="min-h-screen bg-background">
         {/* Hero Section */}
@@ -130,7 +137,7 @@ export default function Dashboard() {
             <div className="container mx-auto px-4 py-16">
                 <div className="text-center mb-12">
                     <h1 className="text-6xl font-bold mb-6 font-orbitron">
-                        <span className="bg-gradient-to-r from-white to-gray-300 inline-block text-transparent bg-clip-text">Anchor Academy</span> 🚀
+                        <span className="tracking-tighter">Anchor Academy</span> 🚀
                     </h1>
                     <p className="text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto font-space">
                         Embark on an interstellar journey to master Anchor development! Learn Solana programming 
@@ -151,6 +158,10 @@ export default function Dashboard() {
                             <span>Real Rust practice</span>
                         </div>
                     </div>
+                </div>
+
+                <div className="flex justify-end p-3">
+                    <ThemeSelect />
                 </div>
 
                 {/* Progress Overview */}
@@ -232,6 +243,11 @@ export default function Dashboard() {
             {/* Features */}
             <div>
                 <WobbleCardDemo />
+            </div>
+        </div>
+        <div>
+            <div className="flex justify-center">
+                <h1 className="font-orbitron font-bold text-4xl -bottom-5 tracking-tighter">ANCHOR ACADEMY</h1>
             </div>
         </div>
     </div>

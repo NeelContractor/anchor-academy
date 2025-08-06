@@ -22,7 +22,7 @@ export const LessonCard = ({ lesson, onStart }: LessonCardProps) => {
     const getStatusIcon = () => {
         if (lesson.completed) return <CheckCircle className="w-5 h-5 text-success" />;
         if (lesson.locked) return <Lock className="w-5 h-5 text-muted-foreground" />;
-        return <Trophy className="w-5 h-5 text-white" />;
+        return <Trophy className="w-5 h-5 " />;
     };
 
     return (
@@ -66,10 +66,10 @@ export const LessonCard = ({ lesson, onStart }: LessonCardProps) => {
                     onClick={onStart}
                     disabled={lesson.locked}
                     variant={lesson.completed ? "outline" : "default"}
-                    className={lesson.completed 
-                        ? "hover:bg-success/10 border-success/20 text-success" 
-                        : "bg-gradient-ocean hover:bg-primary/90 shadow-ocean bg-white"
-                    }
+                    // className={lesson.completed 
+                    //     ? "hover:bg-success/10 border-success/20 text-success" 
+                    //     : "bg-gradient-ocean hover:bg-primary/90 shadow-ocean"
+                    // }
                 >
                     {lesson.completed ? '📖 Review' : lesson.locked ? '🔒 Locked' : '🚀 Start'}
                 </Button>
@@ -86,7 +86,7 @@ export const LessonCard = ({ lesson, onStart }: LessonCardProps) => {
                             </li>
                         ))}
                         {lesson.objectives.length > 2 && (
-                            <li className="font-medium text-white">
+                            <li className="font-medium">
                                 +{lesson.objectives.length - 2} more objectives
                             </li>
                         )}
