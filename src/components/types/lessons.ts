@@ -18,7 +18,7 @@ export interface Lesson {
     code: {
       initial: string;
       solution: string;
-      tests: string[] | Tests[];
+      tests: Tests[];
     };
     hints: string[];
     completed: boolean;
