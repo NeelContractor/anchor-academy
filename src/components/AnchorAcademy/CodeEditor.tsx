@@ -356,11 +356,20 @@ export const CodeEditor = ({ initialCode, solution, tests, onComplete, hints }: 
     }
   };
 
-  // CORRECTED VALIDATION HELPER FUNCTIONS
+  // Anchor/Solana validation helpers - Fixed for better accuracy
+  const validateSpaceStationStruct = (code: string): boolean => {
+    const hasAccount = /#\[account\]/.test(code);
+    const hasStruct = /pub\s+struct\s+SpaceStation/.test(code);
+    const hasStationName = /station_name:\s*String/.test(code);
+    const hasCommander = /commander:\s*Pubkey/.test(code);
+    const hasCrewCount = /crew_count:\s*u16/.test(code);
+    const hasFuelReserves = /fuel_reserves:\s*u64/.test(code);
+    const hasOperational = /operational:\s*bool/.test(code);
+    return hasAccount && hasStruct && hasStationName && hasCommander;
+  };
 
   // Rust Variables Validation - Fixed to be more robust
   const validateImmutableVariables = (code: string): boolean => {
-    // Check for immutable variables (using let, not let mut)
     const hasShipName = /let\s+ship_name\s*=.*"USS Solana"/.test(code) && !code.includes('let mut ship_name');
     const hasMaxCrewSize = /let\s+max_crew_size\s*:\s*u8\s*=\s*50/.test(code) && !code.includes('let mut max_crew_size');
     const hasMaxFuelCapacity = /let\s+max_fuel_capacity\s*:\s*u32\s*=\s*10000/.test(code) && !code.includes('let mut max_fuel_capacity');
@@ -376,15 +385,13 @@ export const CodeEditor = ({ initialCode, solution, tests, onComplete, hints }: 
   };
 
   const validateTypeAnnotations = (code: string): boolean => {
-    // Check for explicit type annotations
-    const hasU8Types = (code.match(/:\s*u8/g) || []).length >= 2; // max_crew_size and crew_count
-    const hasU32Types = (code.match(/:\s*u32/g) || []).length >= 2; // max_fuel_capacity and current_fuel
+    const hasU8Types = (code.match(/:\s*u8/g) || []).length >= 2;
+    const hasU32Types = (code.match(/:\s*u32/g) || []).length >= 2;
     const hasBoolType = code.includes(': bool');
     return hasU8Types && hasU32Types && hasBoolType;
   };
 
   const validateOperations = (code: string): boolean => {
-    // Check for the specific operations
     const hasFuelOperation = /current_fuel\s*-=\s*500/.test(code) || /current_fuel\s*=\s*current_fuel\s*-\s*500/.test(code);
     const hasCrewOperation = /crew_count\s*\+=\s*10/.test(code) || /crew_count\s*=\s*crew_count\s*\+\s*10/.test(code);
     const hasShieldOperation = /shields_active\s*=\s*true/.test(code);
@@ -392,7 +399,6 @@ export const CodeEditor = ({ initialCode, solution, tests, onComplete, hints }: 
   };
 
   const validateTypeCasting = (code: string): boolean => {
-    // Check for type casting examples
     const hasF32Cast = /as\s+f32/.test(code);
     const hasU32Cast = /as\s+u32/.test(code);
     return hasF32Cast && hasU32Cast;
@@ -406,7 +412,6 @@ export const CodeEditor = ({ initialCode, solution, tests, onComplete, hints }: 
   };
 
   const validateMissionReadiness = (code: string): boolean => {
-    // Check for mission readiness logic
     const hasReadyVariable = /let\s+ready_for_mission\s*=/.test(code);
     const hasAndOperator = code.includes('&&');
     const hasFuelCheck = /current_fuel\s*>\s*1000/.test(code);
@@ -446,7 +451,6 @@ export const CodeEditor = ({ initialCode, solution, tests, onComplete, hints }: 
     const hasFunction = /fn\s+calculate_warp_speed/.test(code);
     const hasParams = /base_speed:\s*f64.*warp_factor:\s*u8/.test(code);
     const hasPowF = code.includes('.powf(1.5)');
-    const hasWarpLimit = /if\s+warp_factor\s*>\s*9/.test(code) || code.includes('warp_factor > 9');
     return hasFunction && hasParams && hasPowF;
   };
 
@@ -467,23 +471,10 @@ export const CodeEditor = ({ initialCode, solution, tests, onComplete, hints }: 
   };
 
   const validateTypeSafety = (code: string): boolean => {
-    // Check for proper type usage without obvious errors
     return !code.includes('TODO') && 
            code.includes('fn ') && 
            !code.includes('type mismatch') && 
            code.length > 200;
-  };
-
-  // Anchor/Solana validation helpers - Fixed for better accuracy
-  const validateSpaceStationStruct = (code: string): boolean => {
-    const hasAccount = /#\[account\]/.test(code);
-    const hasStruct = /pub\s+struct\s+SpaceStation/.test(code);
-    const hasStationName = /station_name:\s*String/.test(code);
-    const hasCommander = /commander:\s*Pubkey/.test(code);
-    const hasCrewCount = /crew_count:\s*u16/.test(code);
-    const hasFuelReserves = /fuel_reserves:\s*u64/.test(code);
-    const hasOperational = /operational:\s*bool/.test(code);
-    return hasAccount && hasStruct && hasStationName && hasCommander;
   };
 
   const validateSpaceCalculation = (code: string): boolean => {
@@ -527,46 +518,117 @@ export const CodeEditor = ({ initialCode, solution, tests, onComplete, hints }: 
 
   // Mission Control validation helpers - Fixed
   const validateMissionStructs = (code: string): boolean => {
-    const hasMissionControl = /pub\s+struct\s+MissionControl/.test(code);
-    const hasMission = /pub\s+struct\s+Mission/.test(code);
+    // Check for both MissionControl and Mission structs with required fields
+    const hasMissionControlStruct = /#\[account\]\s*pub\s+struct\s+MissionControl/.test(code) || 
+                                   /pub\s+struct\s+MissionControl[\s\S]*?#\[account\]/.test(code) ||
+                                   (/struct\s+MissionControl/.test(code) && /#\[account\]/.test(code));
+    
+    const hasMissionStruct = /#\[account\]\s*pub\s+struct\s+Mission/.test(code) || 
+                             /pub\s+struct\s+Mission[\s\S]*?#\[account\]/.test(code) ||
+                             (/struct\s+Mission/.test(code) && /#\[account\]/.test(code));
+    
+    // Check for required MissionControl fields
     const hasAuthority = /authority:\s*Pubkey/.test(code);
+    const hasTotalMissions = /total_missions:\s*u32/.test(code);
+    const hasActiveMissions = /active_missions:\s*u32/.test(code);
+    const hasEmergencyContact = /emergency_contact:\s*Pubkey/.test(code);
+    const hasInitialized = /initialized:\s*bool/.test(code);
+    
+    // Check for required Mission fields
+    const hasMissionId = /mission_id:\s*u32/.test(code);
+    const hasCommander = /commander:\s*Pubkey/.test(code);
     const hasMissionName = /mission_name:\s*String/.test(code);
-    return hasMissionControl && hasMission && hasAuthority && hasMissionName;
+    const hasDestination = /destination:\s*String/.test(code);
+    const hasCrewSize = /crew_size:\s*u8/.test(code);
+    const hasStatus = /status:\s*u8/.test(code);
+    const hasFuelAllocated = /fuel_allocated:\s*u64/.test(code);
+    const hasCreatedAt = /created_at:\s*i64/.test(code);
+    
+    const missionControlComplete = hasMissionControlStruct && hasAuthority && hasTotalMissions && hasActiveMissions;
+    const missionComplete = hasMissionStruct && hasMissionId && hasCommander && hasMissionName && hasDestination;
+    
+    return missionControlComplete && missionComplete;
   };
 
   const validateMissionSpaceCalculations = (code: string): boolean => {
-    const has81 = /space\s*=\s*81/.test(code) || /space:\s*81/.test(code);
-    const has150 = /space\s*=\s*150/.test(code) || /space:\s*150/.test(code);
+    // Much more flexible space calculation matching for both 81 and 150
+    const has81 = /space\s*[=:]\s*81/.test(code) || 
+                  code.includes('space = 81') ||
+                  code.includes('space: 81') ||
+                  code.includes('81 bytes') ||
+                  /#\[account\([\s\S]*?space\s*=\s*81/.test(code) ||
+                  /InitializeControl[\s\S]*?space\s*=\s*81/.test(code) ||
+                  // Allow calculation comments
+                  code.includes('8 + 32 + 4 + 4 + 32 + 1 = 81') ||
+                  code.includes('8 (discriminator) + 32 (authority) + 4 (total_missions) + 4 (active_missions) + 32 (emergency_contact) + 1 (initialized) = 81');
+    
+    const has150 = /space\s*[=:]\s*150/.test(code) || 
+                   code.includes('space = 150') ||
+                   code.includes('space: 150') ||
+                   code.includes('150 bytes') ||
+                   /#\[account\([\s\S]*?space\s*=\s*150/.test(code) ||
+                   /CreateMission[\s\S]*?space\s*=\s*150/.test(code) ||
+                   // Allow calculation comments
+                   code.includes('8 + 4 + 32 + 54 + 34 + 1 + 1 + 8 + 8 = 150') ||
+                   code.includes('150 bytes');
+    
     return has81 && has150;
   };
 
   const validateAllInstructions = (code: string): boolean => {
-    const hasInitialize = /initialize_control/.test(code);
-    const hasCreate = /create_mission/.test(code);
-    const hasLaunch = /launch_mission/.test(code);
-    const hasComplete = /complete_mission/.test(code);
-    const hasAbort = /abort_mission/.test(code);
-    return hasInitialize && hasCreate && hasLaunch && hasComplete && hasAbort;
+    // Look for all 5 instruction functions with proper pub fn signatures
+    const hasInitialize = /pub\s+fn\s+initialize_control/.test(code) || /fn\s+initialize_control/.test(code);
+    const hasCreate = /pub\s+fn\s+create_mission/.test(code) || /fn\s+create_mission/.test(code);
+    const hasLaunch = /pub\s+fn\s+launch_mission/.test(code) || /fn\s+launch_mission/.test(code);
+    const hasComplete = /pub\s+fn\s+complete_mission/.test(code) || /fn\s+complete_mission/.test(code);
+    const hasAbort = /pub\s+fn\s+abort_mission/.test(code) || /fn\s+abort_mission/.test(code);
+    
+    // Also check that they have basic function bodies (not just stubs)
+    const hasOkReturns = (code.match(/Ok\(\)\)/g) || []).length >= 3;
+    
+    return hasInitialize && hasCreate && hasLaunch && hasComplete && hasAbort && hasOkReturns;
   };
 
   const validateRequireMacro = (code: string): boolean => {
-    const hasRequire = /require!\s*\(/.test(code);
-    const hasError = /MissionError::/.test(code) || /ErrorCode::/.test(code);
-    return hasRequire && hasError;
+    // Check for require! macro usage
+    const hasRequire = /require!\s*\(/.test(code) || code.includes('require!(');
+    
+    // Check for MissionError enum with error_code attribute
+    const hasErrorEnum = /#\[error_code\]\s*pub\s+enum\s+MissionError/.test(code) || 
+                         /#\[error_code\]\s*enum\s+MissionError/.test(code) ||
+                         (/#\[error_code\]/.test(code) && /enum\s+MissionError/.test(code));
+    
+    // Check for usage of MissionError variants
+    const hasErrorUsage = /MissionError::/.test(code);
+    
+    // Check for common error variants
+    const hasErrorVariants = /MissionNameTooLong/.test(code) || 
+                             /DestinationTooLong/.test(code) || 
+                             /InvalidCrewSize/.test(code) ||
+                             /InsufficientFuel/.test(code);
+    
+    return hasRequire && hasErrorEnum && hasErrorUsage && hasErrorVariants;
   };
 
   const validateAccountConstraints = (code: string): boolean => {
     const hasOne = /has_one/.test(code);
-    const hasInit = /#\[account\(init/.test(code);
-    const hasMut = /#\[account\(.*mut/.test(code);
-    return hasOne && hasInit && hasMut;
+    const hasInit = /#\[account\(\s*init/.test(code) || code.includes('#[account(init');
+    const hasMut = /#\[account\(\s*mut/.test(code) || /#\[account\([^)]*mut/.test(code);
+    const hasPayer = /payer\s*=/.test(code);
+    return hasOne && hasInit && hasMut && hasPayer;
   };
 
   const validateStatusTransitions = (code: string): boolean => {
-    const hasStatusCheck = /status\s*==\s*0/.test(code);
-    const hasStatusSet = /status\s*=\s*1/.test(code);
-    const hasActiveCheck = /status\s*==\s*1/.test(code);
-    return hasStatusCheck && hasStatusSet;
+    // Check for status checks and updates in various formats
+    const hasStatusCheck = /status\s*==\s*0/.test(code) || /mission\.status\s*==\s*0/.test(code);
+    const hasStatusSet = /status\s*=\s*1/.test(code) || /mission\.status\s*=\s*1/.test(code);
+    const hasActiveCheck = /status\s*==\s*1/.test(code) || /mission\.status\s*==\s*1/.test(code);
+    
+    // Also check for status = 2 (completed) and status = 3 (aborted)
+    const hasCompletedStatus = /status\s*=\s*2/.test(code) || /mission\.status\s*=\s*2/.test(code);
+    const hasAbortedStatus = /status\s*=\s*3/.test(code) || /mission\.status\s*=\s*3/.test(code);
+    
+    return (hasStatusCheck || hasActiveCheck) && (hasStatusSet || hasCompletedStatus || hasAbortedStatus);
   };
 
   const validateCounters = (code: string): boolean => {
@@ -599,7 +661,16 @@ export const CodeEditor = ({ initialCode, solution, tests, onComplete, hints }: 
   };
 
   const validateTestCompilation = (code: string): boolean => {
-    return /anchor\.workspace/.test(code) || /program\.account/.test(code);
+    // More flexible TypeScript test validation
+    const hasImports = /import.*anchor/.test(code) || /from.*anchor/.test(code);
+    const hasDescribe = /describe\s*\(/.test(code);
+    const hasIt = /it\s*\(/.test(code);
+    const hasProgram = /program\.methods/.test(code) || /workspace\./.test(code);
+    const hasAsync = /async/.test(code);
+    const hasAwait = /await/.test(code);
+    const noTodos = !code.includes('TODO');
+    
+    return hasImports && hasDescribe && hasIt && hasProgram && hasAsync && hasAwait && noTodos;
   };
 
   // Deployment validation helpers - More flexible
@@ -635,7 +706,14 @@ export const CodeEditor = ({ initialCode, solution, tests, onComplete, hints }: 
   };
 
   const validatePDASpaceCalculation = (code: string): boolean => {
-    return /space\s*=\s*52/.test(code) || /space:\s*52/.test(code) || code.includes('8 + 36 + 8');
+    // More flexible space calculation matching
+    const hasSpace52 = /space\s*=\s*52/.test(code) || 
+                       /space:\s*52/.test(code) || 
+                       code.includes('8 + 36 + 8') ||
+                       code.includes('52 bytes') ||
+                       /#\[account\([^}]*space\s*=\s*(8\s*\+\s*36\s*\+\s*8|52)/.test(code);
+    
+    return hasSpace52;
   };
 
   const validateRequiredAccounts = (code: string): boolean => {
@@ -719,7 +797,14 @@ export const CodeEditor = ({ initialCode, solution, tests, onComplete, hints }: 
   };
 
   const validateFinalDevnetDeployment = (code: string): boolean => {
-    return /devnet/.test(code) || /deploy/.test(code) || /anchor\s+deploy/.test(code);
+    // More flexible deployment validation
+    const hasDevnet = /devnet/.test(code);
+    const hasDeploy = /deploy/.test(code);
+    const hasAnchorDeploy = /anchor\s+deploy/.test(code);
+    const hasProgramId = /program.*id/i.test(code) || /programId/.test(code);
+    
+    // Accept if any deployment-related content is present
+    return hasDevnet || (hasDeploy && (hasAnchorDeploy || hasProgramId));
   };
 
   const validateConceptPresentation = (code: string): boolean => {

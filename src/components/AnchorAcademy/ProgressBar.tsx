@@ -20,7 +20,7 @@ export const ProgressBar = ({ xp, level, streak, completedLessons, totalLessons 
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 bg-gradient-ocean rounded-full flex items-center justify-center  font-bold shadow-ocean">
+                        <div className="w-10 h-10 bg-gradient-ocean rounded-full flex items-center justify-center font-bold shadow-ocean">
                             {level}
                         </div>
                         <div>

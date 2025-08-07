@@ -949,188 +949,184 @@ export const chapters: Chapter[] = [
     // - Variants for all cases: MissionNameTooLong, DestinationTooLong, InvalidCrewSize, InsufficientFuel, InvalidMissionStatus, MissionNotActive
     `,
                     solution: `// Mission: Mission Management Control System with Anchor
-    use anchor_lang::prelude::*;
-    
-    declare_id!("11111111111111111111111111111111");
-    
-    // -- Accounts --
-    
-    // MissionControl struct (persistent program state)
-    // Space: 8 (discriminator) + 32 (authority) + 4 (total_missions) + 4 (active_missions) + 32 (emergency_contact) + 1 (initialized) = 81 bytes
-    #[account]
-    pub struct MissionControl {
-        pub authority: Pubkey,         // 32 bytes
-        pub total_missions: u32,       // 4 bytes
-        pub active_missions: u32,      // 4 bytes
-        pub emergency_contact: Pubkey, // 32 bytes
-        pub initialized: bool,         // 1 byte
+use anchor_lang::prelude::*;
+
+declare_id!("11111111111111111111111111111111");
+
+// MissionControl struct (persistent program state)
+// Space: 8 (discriminator) + 32 (authority) + 4 (total_missions) + 4 (active_missions) + 32 (emergency_contact) + 1 (initialized) = 81 bytes
+#[account]
+pub struct MissionControl {
+    pub authority: Pubkey,         // 32 bytes
+    pub total_missions: u32,       // 4 bytes  
+    pub active_missions: u32,      // 4 bytes
+    pub emergency_contact: Pubkey, // 32 bytes
+    pub initialized: bool,         // 1 byte
+}
+
+// Mission struct (per-mission state)  
+// Space: 8 (disc) + 4 (mission_id) + 32 (commander) + 54 (mission_name: 4 + 50) + 34 (destination: 4 + 30)
+//        + 1 (crew_size) + 1 (status) + 8 (fuel) + 8 (created_at) = 150 bytes
+#[account]
+pub struct Mission {
+    pub mission_id: u32,           // 4 bytes
+    pub commander: Pubkey,         // 32 bytes
+    pub mission_name: String,      // 4 + 50 = 54 bytes
+    pub destination: String,       // 4 + 30 = 34 bytes
+    pub crew_size: u8,             // 1 byte
+    pub status: u8,                // 1 byte (0=Planning, 1=Active, 2=Completed, 3=Aborted)
+    pub fuel_allocated: u64,       // 8 bytes
+    pub created_at: i64,           // 8 bytes
+}
+
+#[program]
+pub mod mission_control {
+    use super::*;
+
+    pub fn initialize_control(ctx: Context<InitializeControl>) -> Result<()> {
+        let mission_control = &mut ctx.accounts.mission_control;
+        mission_control.authority = ctx.accounts.authority.key();
+        mission_control.total_missions = 0;
+        mission_control.active_missions = 0;
+        mission_control.emergency_contact = ctx.accounts.authority.key();
+        mission_control.initialized = true;
+        msg!("Mission Control initialized by {}", ctx.accounts.authority.key());
+        Ok(())
     }
-    
-    // Mission struct (per-mission state)
-    // Space: 8 (disc) + 4 (mission_id) + 32 (commander) + 54 (mission_name: 4 + 50) + 34 (destination: 4 + 30)
-    //        +1 (crew_size) +1 (status) +8 (fuel) +8 (created_at) = 150 bytes
-    #[account]
-    pub struct Mission {
-        pub mission_id: u32,           // 4 bytes
-        pub commander: Pubkey,         // 32 bytes
-        pub mission_name: String,      // 4 + 50
-        pub destination: String,       // 4 + 30
-        pub crew_size: u8,             // 1 byte
-        pub status: u8,                // 1 byte (0=Planning, 1=Active, 2=Completed, 3=Aborted)
-        pub fuel_allocated: u64,       // 8 bytes
-        pub created_at: i64,           // 8 bytes
+
+    pub fn create_mission(
+        ctx: Context<CreateMission>,
+        mission_name: String,
+        destination: String,
+        crew_size: u8,
+        fuel_allocated: u64
+    ) -> Result<()> {
+        require!(mission_name.len() <= 50, MissionError::MissionNameTooLong);
+        require!(destination.len() <= 30, MissionError::DestinationTooLong);
+        require!(crew_size >= 1 && crew_size <= 100, MissionError::InvalidCrewSize);
+        require!(fuel_allocated > 0, MissionError::InsufficientFuel);
+
+        let mission_control = &mut ctx.accounts.mission_control;
+        let mission = &mut ctx.accounts.mission;
+
+        mission.mission_id = mission_control.total_missions + 1;
+        mission.commander = ctx.accounts.commander.key();
+        mission.mission_name = mission_name;
+        mission.destination = destination;
+        mission.crew_size = crew_size;
+        mission.status = 0; // Planning
+        mission.fuel_allocated = fuel_allocated;
+        mission.created_at = Clock::get()?.unix_timestamp;
+
+        mission_control.total_missions += 1;
+        mission_control.active_missions += 1;
+
+        msg!(
+            "New mission '{}' created by {} (to: {})",
+            mission.mission_name,
+            mission.commander,
+            mission.destination
+        );
+        Ok(())
     }
-    
-    #[program]
-    pub mod mission_control {
-        use super::*;
-    
-        pub fn initialize_control(ctx: Context<InitializeControl>) -> Result<()> {
-            let mission_control = &mut ctx.accounts.mission_control;
-            mission_control.authority = ctx.accounts.authority.key();
-            mission_control.total_missions = 0;
-            mission_control.active_missions = 0;
-            mission_control.emergency_contact = ctx.accounts.authority.key();
-            mission_control.initialized = true;
-            msg!("Mission Control initialized by {}", ctx.accounts.authority.key());
-            Ok(())
-        }
-    
-        pub fn create_mission(
-            ctx: Context<CreateMission>,
-            mission_name: String,
-            destination: String,
-            crew_size: u8,
-            fuel_allocated: u64
-        ) -> Result<()> {
-            require!(mission_name.len() <= 50, MissionError::MissionNameTooLong);
-            require!(destination.len() <= 30, MissionError::DestinationTooLong);
-            require!(crew_size >= 1 && crew_size <= 100, MissionError::InvalidCrewSize);
-            require!(fuel_allocated > 0, MissionError::InsufficientFuel);
-    
-            let mission_control = &mut ctx.accounts.mission_control;
-            let mission = &mut ctx.accounts.mission;
-    
-            mission.mission_id = mission_control.total_missions + 1;
-            mission.commander = ctx.accounts.commander.key();
-            mission.mission_name = mission_name;
-            mission.destination = destination;
-            mission.crew_size = crew_size;
-            mission.status = 0; // Planning
-            mission.fuel_allocated = fuel_allocated;
-            mission.created_at = Clock::get()?.unix_timestamp;
-    
-            mission_control.total_missions += 1;
-            mission_control.active_missions += 1;
-    
-            msg!(
-                "New mission '{}' created by {} (to: {})",
-                mission.mission_name,
-                mission.commander,
-                mission.destination
-            );
-            Ok(())
-        }
-    
-        pub fn launch_mission(ctx: Context<LaunchMission>) -> Result<()> {
-            let mission = &mut ctx.accounts.mission;
-            require!(mission.status == 0, MissionError::InvalidMissionStatus);
-            mission.status = 1;
-            msg!("Mission '{}' launched by Commander {}", mission.mission_name, mission.commander);
-            Ok(())
-        }
-    
-        pub fn complete_mission(ctx: Context<CompleteMission>) -> Result<()> {
-            let mission_control = &mut ctx.accounts.mission_control;
-            let mission = &mut ctx.accounts.mission;
-            require!(mission.status == 1, MissionError::MissionNotActive);
-    
-            mission.status = 2;
-            mission_control.active_missions -= 1;
-    
-            msg!("Mission '{}' completed! Welcome home!", mission.mission_name);
-            Ok(())
-        }
-    
-        pub fn abort_mission(ctx: Context<AbortMission>) -> Result<()> {
-            let mission_control = &mut ctx.accounts.mission_control;
-            let mission = &mut ctx.accounts.mission;
-            require!(mission.status == 1, MissionError::MissionNotActive);
-    
-            mission.status = 3;
-            mission_control.active_missions -= 1;
-    
-            msg!("EMERGENCY ABORT: Mission '{}' aborted by authority", mission.mission_name);
-            Ok(())
-        }
+
+    pub fn launch_mission(ctx: Context<LaunchMission>) -> Result<()> {
+        let mission = &mut ctx.accounts.mission;
+        require!(mission.status == 0, MissionError::InvalidMissionStatus);
+        mission.status = 1;
+        msg!("Mission '{}' launched by Commander {}", mission.mission_name, mission.commander);
+        Ok(())
     }
-    
-    // -- Contexts --
-    
-    #[derive(Accounts)]
-    pub struct InitializeControl<'info> {
-        #[account(init, payer = authority, space = 81)]
-        pub mission_control: Account<'info, MissionControl>,
-        #[account(mut)]
-        pub authority: Signer<'info>,
-        pub system_program: Program<'info, System>,
+
+    pub fn complete_mission(ctx: Context<CompleteMission>) -> Result<()> {
+        let mission_control = &mut ctx.accounts.mission_control;
+        let mission = &mut ctx.accounts.mission;
+        require!(mission.status == 1, MissionError::MissionNotActive);
+
+        mission.status = 2;
+        mission_control.active_missions -= 1;
+
+        msg!("Mission '{}' completed! Welcome home!", mission.mission_name);
+        Ok(())
     }
-    
-    #[derive(Accounts)]
-    #[instruction(mission_name: String)]
-    pub struct CreateMission<'info> {
-        #[account(mut, has_one = authority)]
-        pub mission_control: Account<'info, MissionControl>,
-        #[account(init, payer = commander, space = 150)]
-        pub mission: Account<'info, Mission>,
-        #[account(mut)]
-        pub commander: Signer<'info>,
-        /// CHECK: For has_one constraint on mission_control
-        pub authority: AccountInfo<'info>,
-        pub system_program: Program<'info, System>,
+
+    pub fn abort_mission(ctx: Context<AbortMission>) -> Result<()> {
+        let mission_control = &mut ctx.accounts.mission_control;
+        let mission = &mut ctx.accounts.mission;
+        require!(mission.status == 1, MissionError::MissionNotActive);
+
+        mission.status = 3;
+        mission_control.active_missions -= 1;
+
+        msg!("EMERGENCY ABORT: Mission '{}' aborted by authority", mission.mission_name);
+        Ok(())
     }
-    
-    #[derive(Accounts)]
-    pub struct LaunchMission<'info> {
-        #[account(mut, has_one = commander)]
-        pub mission: Account<'info, Mission>,
-        pub commander: Signer<'info>,
-    }
-    
-    #[derive(Accounts)]
-    pub struct CompleteMission<'info> {
-        #[account(mut)]
-        pub mission_control: Account<'info, MissionControl>,
-        #[account(mut, has_one = commander)]
-        pub mission: Account<'info, Mission>,
-        pub commander: Signer<'info>,
-    }
-    
-    #[derive(Accounts)]
-    pub struct AbortMission<'info> {
-        #[account(mut, has_one = authority)]
-        pub mission_control: Account<'info, MissionControl>,
-        #[account(mut)]
-        pub mission: Account<'info, Mission>,
-        pub authority: Signer<'info>,
-    }
-    
-    #[error_code]
-    pub enum MissionError {
-        #[msg("Mission name cannot exceed 50 characters")]
-        MissionNameTooLong,
-        #[msg("Destination name cannot exceed 30 characters")]
-        DestinationTooLong,
-        #[msg("Crew size must be between 1 and 100")]
-        InvalidCrewSize,
-        #[msg("Fuel allocation must be greater than 0")]
-        InsufficientFuel,
-        #[msg("Mission is not in the correct status for this operation")]
-        InvalidMissionStatus,
-        #[msg("Mission must be active to perform this action")]
-        MissionNotActive,
-    }
-    `,
+}
+
+// Context structs
+#[derive(Accounts)]
+pub struct InitializeControl<'info> {
+    #[account(init, payer = authority, space = 81)]
+    pub mission_control: Account<'info, MissionControl>,
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+#[instruction(mission_name: String)]
+pub struct CreateMission<'info> {
+    #[account(mut, has_one = authority)]
+    pub mission_control: Account<'info, MissionControl>,
+    #[account(init, payer = commander, space = 150)]
+    pub mission: Account<'info, Mission>,
+    #[account(mut)]
+    pub commander: Signer<'info>,
+    /// CHECK: For has_one constraint on mission_control
+    pub authority: AccountInfo<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct LaunchMission<'info> {
+    #[account(mut, has_one = commander)]
+    pub mission: Account<'info, Mission>,
+    pub commander: Signer<'info>,
+}
+
+#[derive(Accounts)]
+pub struct CompleteMission<'info> {
+    #[account(mut)]
+    pub mission_control: Account<'info, MissionControl>,
+    #[account(mut, has_one = commander)]
+    pub mission: Account<'info, Mission>,
+    pub commander: Signer<'info>,
+}
+
+#[derive(Accounts)]
+pub struct AbortMission<'info> {
+    #[account(mut, has_one = authority)]
+    pub mission_control: Account<'info, MissionControl>,
+    #[account(mut)]
+    pub mission: Account<'info, Mission>,
+    pub authority: Signer<'info>,
+}
+
+#[error_code]
+pub enum MissionError {
+    #[msg("Mission name cannot exceed 50 characters")]
+    MissionNameTooLong,
+    #[msg("Destination name cannot exceed 30 characters")]  
+    DestinationTooLong,
+    #[msg("Crew size must be between 1 and 100")]
+    InvalidCrewSize,
+    #[msg("Fuel allocation must be greater than 0")]
+    InsufficientFuel,
+    #[msg("Mission is not in the correct status for this operation")]
+    InvalidMissionStatus,
+    #[msg("Mission must be active to perform this action")]
+    MissionNotActive,
+}`,
                     tests: [
                         {
                             name: 'MissionControl and Mission structs defined with correct field types',
@@ -1208,136 +1204,135 @@ export const chapters: Chapter[] = [
             }
         ]
     },
-    {
-        id: 'testing-anchor-cli',
-        title: 'Test Simulators (Testing with Anchor CLI)',
-        description: 'Simulate and verify your smart contracts using Anchor tests.',
-        icon: '🧪',
-        color: 'bg-gradient-lab',
-        completed: false,
-        lessons: [
-            {
-                id: 'writing-anchor-tests',
-                title: 'Running Simulations (Anchor Tests)',
-                description: 'Write and run your first Anchor test in TypeScript.',
-                chapter: 4,
-                order: 1,
-                difficulty: 'intermediate',
-                estimatedTime: 20,
-                storyText: `
-    You've powered up your interstellar engine—now it's time for the ultimate prelaunch ritual: **simulation testing**!
+//     {
+//         id: 'testing-anchor-cli',
+//         title: 'Test Simulators (Testing with Anchor CLI)',
+//         description: 'Simulate and verify your smart contracts using Anchor tests.',
+//         icon: '🧪',
+//         color: 'bg-gradient-lab',
+//         completed: false,
+//         lessons: [
+//             {
+//                 id: 'writing-anchor-tests',
+//                 title: 'Running Simulations (Anchor Tests)',
+//                 description: 'Write and run your first Anchor test in TypeScript.',
+//                 chapter: 4,
+//                 order: 1,
+//                 difficulty: 'intermediate',
+//                 estimatedTime: 20,
+//                 storyText: `
+//     You've powered up your interstellar engine—now it's time for the ultimate prelaunch ritual: **simulation testing**!
     
-    Anchor tests use TypeScript to mimic real Solana transactions, giving you zero-risk confidence before going on-chain.
+//     Anchor tests use TypeScript to mimic real Solana transactions, giving you zero-risk confidence before going on-chain.
     
-    ---
+//     ---
     
-    ## How Anchor Testing Works
+//     ## How Anchor Testing Works
     
-    - **Workspace:** Anchor exposes your deployed smart contract as a JS object (\`anchor.workspace.YourProgram\`)
-    - **TypeScript:** Write readable, async tests instead of boilerplate Rust/CLI scripts
-    - **chai:** Assertions on blockchain state—verify your smart contract logic automatically
+//     - **Workspace:** Anchor exposes your deployed smart contract as a JS object (\`anchor.workspace.YourProgram\`)
+//     - **TypeScript:** Write readable, async tests instead of boilerplate Rust/CLI scripts
+//     - **chai:** Assertions on blockchain state—verify your smart contract logic automatically
     
-    When your test passes, you've successfully simulated a full on-chain mission, end-to-end!
+//     When your test passes, you've successfully simulated a full on-chain mission, end-to-end!
     
-    ---
+//     ---
     
-    Let's simulate and verify a "Warp Core" smart contract:
-    `,
-                objectives: [
-                    'Write an Anchor test that initializes a program account',
-                    'Use Anchor’s workspace object to invoke program instructions',
-                    'Assert expected outcomes with chai’s powerful matchers',
-                ],
-                code: {
-                    initial: `import * as anchor from '@coral-xyz/anchor';
-    import { Program } from '@coral-xyz/anchor';
-    import { WarpCore } from '../target/types/warp_core';
+//     Let's simulate and verify a "Warp Core" smart contract:
+//     `,
+//                 objectives: [
+//                     'Write an Anchor test that initializes a program account',
+//                     'Use Anchor’s workspace object to invoke program instructions',
+//                     'Assert expected outcomes with chai’s powerful matchers',
+//                 ],
+//                 code: {
+//                     initial: `import * as anchor from '@coral-xyz/anchor';
+//     import { Program } from '@coral-xyz/anchor';
+//     import { WarpCore } from '../target/types/warp_core';
     
-    // Mission: Write (and pass) an initialization test!
-    //
-    // 1. Setup Anchor workspace and your program object
-    // 2. Find your program-derived address (PDA) for the ship account
-    // 3. Call the initialize instruction to create the ship account
-    // 4. Fetch the ship account and assert its fields
+//     // Mission: Write (and pass) an initialization test!
+//     //
+//     // 1. Setup Anchor workspace and your program object
+//     // 2. Find your program-derived address (PDA) for the ship account
+//     // 3. Call the initialize instruction to create the ship account
+//     // 4. Fetch the ship account and assert its fields
     
-    describe('warp-core', () => {
-      // TODO 1: Set up Anchor provider (anchor.AnchorProvider.env()) and workspace program object
+//     describe('warp-core', () => {
+//       // TODO 1: Set up Anchor provider (anchor.AnchorProvider.env()) and workspace program object
     
-      it('initializes a ship state', async () => {
-        // TODO 2: Find the ship PDA (use PublicKey.findProgramAddress)
-        // TODO 3: Call initialize via program.methods and .rpc()
-        // TODO 4: Fetch ship account and assert fields match expected values
-      });
-    });
-    `,
-                    solution: `import * as anchor from '@coral-xyz/anchor';
-    import { Program } from '@coral-xyz/anchor';
-    import { WarpCore } from '../target/types/warp_core';
-    import { assert } from 'chai';
-    
-    describe('warp-core', () => {
-      // Setup provider and program workspace object
-      const provider = anchor.AnchorProvider.env();
-      anchor.setProvider(provider);
-      const program = anchor.workspace.WarpCore as Program<WarpCore>;
-    
-      it('initializes a ship state', async () => {
-        // Derive the PDA for the ship (for example: ["ship", user pubkey] as seeds)
-        const [shipPDA] = await anchor.web3.PublicKey.findProgramAddress(
-          [Buffer.from('ship'), provider.wallet.publicKey.toBuffer()],
-          program.programId
-        );
-    
-        // Send the initialize instruction to the program
-        await program.methods.initialize('Voyager', new anchor.BN(9000))
-          .accounts({
-            ship: shipPDA,
-            user: provider.wallet.publicKey,
-            systemProgram: anchor.web3.SystemProgram.programId,
-          })
-          .rpc();
-    
-        // Fetch the ship state account and assert expected values
-        const shipAccount = await program.account.shipState.fetch(shipPDA);
-        assert.equal(shipAccount.shipName, 'Voyager');
-        assert.equal(shipAccount.warpFuel.toNumber(), 9000);
-      });
-    });
-    `,
-                    tests: [
-                        {
-                            name: 'Test calls initialize successfully',
-                            description: 'Test calls the initialize instruction with expected parameters and succeeds.',
-                            check: 'Test does not throw and transaction confirms.',
-                            points: 20,
-                        },
-                        {
-                            name: 'Ship account values match expected',
-                            description: 'Test fetches the ship account and fields match (shipName, warpFuel).',
-                            check: 'assert.equal correct for both fields.',
-                            points: 20,
-                        },
-                        {
-                            name: 'Test code compiles and passes',
-                            description: 'Test is TypeScript-valid and passes anchor test.',
-                            check: 'anchor test succeeds with this suite.',
-                            points: 10,
-                        }
-                    ]
-                },
-                hints: [
-                    'Use anchor.workspace.YourProgramName (case-sensitive) for your deployed program object.',
-                    'Look up program-derived addresses (PDAs) with PublicKey.findProgramAddress and an array of seed buffers.',
-                    'Use program.methods.instructionName(params).accounts({ ... }).rpc() to invoke instructions.',
-                    'Use program.account.accountName.fetch(pda) to fetch account state after transactions.',
-                    'For numeric assertions, cast BN fields to JS numbers with .toNumber().',
-                    'chai’s assert.equal(a, b) checks if actual and expected values match.',
-                ],
-                completed: false,
-                locked: false
-            }
-        ]
-    },
+//       it('initializes a ship state', async () => {
+//         // TODO 2: Find the ship PDA (use PublicKey.findProgramAddress)
+//         // TODO 3: Call initialize via program.methods and .rpc()
+//         // TODO 4: Fetch ship account and assert fields match expected values
+//       });
+//     });
+//     `,
+//                     solution: `import * as anchor from '@coral-xyz/anchor';
+// import { Program } from '@coral-xyz/anchor';
+// import { WarpCore } from '../target/types/warp_core';
+// import { assert } from 'chai';
+
+// describe('warp-core', () => {
+//   // Setup provider and program workspace object
+//   const provider = anchor.AnchorProvider.env();
+//   anchor.setProvider(provider);
+//   const program = anchor.workspace.WarpCore as Program<WarpCore>;
+
+//   it('initializes a ship state', async () => {
+//     // Derive the PDA for the ship (for example: ["ship", user pubkey] as seeds)
+//     const [shipPDA] = await anchor.web3.PublicKey.findProgramAddress(
+//       [Buffer.from('ship'), provider.wallet.publicKey.toBuffer()],
+//       program.programId
+//     );
+
+//     // Send the initialize instruction to the program
+//     await program.methods.initialize('Voyager', new anchor.BN(9000))
+//       .accounts({
+//         ship: shipPDA,
+//         user: provider.wallet.publicKey,
+//         systemProgram: anchor.web3.SystemProgram.programId,
+//       })
+//       .rpc();
+
+//     // Fetch the ship state account and assert expected values
+//     const shipAccount = await program.account.shipState.fetch(shipPDA);
+//     assert.equal(shipAccount.shipName, 'Voyager');
+//     assert.equal(shipAccount.warpFuel.toNumber(), 9000);
+//   });
+// });`,
+//                     tests: [
+//                         {
+//                             name: 'Test calls initialize successfully',
+//                             description: 'Test calls the initialize instruction with expected parameters and succeeds.',
+//                             check: 'Test does not throw and transaction confirms.',
+//                             points: 20,
+//                         },
+//                         {
+//                             name: 'Ship account values match expected',
+//                             description: 'Test fetches the ship account and fields match (shipName, warpFuel).',
+//                             check: 'assert.equal correct for both fields.',
+//                             points: 20,
+//                         },
+//                         {
+//                             name: 'Test code compiles and passes',
+//                             description: 'Test is TypeScript-valid and passes anchor test.',
+//                             check: 'anchor test succeeds with this suite.',
+//                             points: 10,
+//                         }
+//                     ]
+//                 },
+//                 hints: [
+//                     'Use anchor.workspace.YourProgramName (case-sensitive) for your deployed program object.',
+//                     'Look up program-derived addresses (PDAs) with PublicKey.findProgramAddress and an array of seed buffers.',
+//                     'Use program.methods.instructionName(params).accounts({ ... }).rpc() to invoke instructions.',
+//                     'Use program.account.accountName.fetch(pda) to fetch account state after transactions.',
+//                     'For numeric assertions, cast BN fields to JS numbers with .toNumber().',
+//                     'chai’s assert.equal(a, b) checks if actual and expected values match.',
+//                 ],
+//                 completed: false,
+//                 locked: false
+//             }
+//         ]
+//     },
     {
         id: 'deploying-devnet',
         title: 'Launch Bay (Deploying to Devnet)',
@@ -1502,31 +1497,30 @@ export const chapters: Chapter[] = [
     }
     `,
                     solution: `use anchor_lang::prelude::*;
-    
-    #[account]
-    pub struct ShipState {
-        pub name: String,    // 4 + 32 = 36 bytes (max 32 chars)
-        pub fuel: u64,       // 8 bytes
-    }
-    // Space: 8 (discriminator) + 36 + 8 = 52 bytes
-    
-    #[derive(Accounts)]
-    pub struct Initialize<'info> {
-        #[account(
-            init,
-            payer = user,
-            space = 8 + 36 + 8, // = 52 bytes
-            seeds = [b"ship", user.key().as_ref()],
-            bump,
-        )]
-        pub ship: Account<'info, ShipState>,
-    
-        #[account(mut)]
-        pub user: Signer<'info>,
-    
-        pub system_program: Program<'info, System>,
-    }
-    `,
+
+#[account]
+pub struct ShipState {
+    pub name: String,    // 4 + 32 = 36 bytes (max 32 chars)
+    pub fuel: u64,       // 8 bytes
+}
+// Space: 8 (discriminator) + 36 + 8 = 52 bytes
+
+#[derive(Accounts)]
+pub struct Initialize<'info> {
+    #[account(
+        init,
+        payer = user,
+        space = 52, // 8 + 36 + 8 = 52 bytes
+        seeds = [b"ship", user.key().as_ref()],
+        bump,
+    )]
+    pub ship: Account<'info, ShipState>,
+
+    #[account(mut)]
+    pub user: Signer<'info>,
+
+    pub system_program: Program<'info, System>,
+}`,
                     tests: [
                         {
                             name: 'ShipState struct is defined properly',
@@ -2045,116 +2039,156 @@ export const chapters: Chapter[] = [
           }
         ]
     },
-    {
-        id: 'final-mission',
-        title: 'Final Mission (Build-a-DApp)',
-        description: 'Your ultimate challenge: build and launch your own Solana app!',
-        icon: '🏁',
-        color: 'bg-gradient-mission',
-        completed: false,
-        lessons: [
-          {
-            id: 'build-final-dapp',
-            title: 'Command the Cosmos (Your DApp Mission)',
-            description: 'Plan and build your own Anchor-powered DApp!',
-            chapter: 11,
-            order: 1,
-            difficulty: 'advanced',
-            estimatedTime: 180,
-            storyText: `
-      Captain, your training is complete and the galaxy awaits your innovation! 🚀
+//     {
+//         id: 'final-mission',
+//         title: 'Final Mission (Build-a-DApp)',
+//         description: 'Your ultimate challenge: build and launch your own Solana app!',
+//         icon: '🏁',
+//         color: 'bg-gradient-mission',
+//         completed: false,
+//         lessons: [
+//           {
+//             id: 'build-final-dapp',
+//             title: 'Command the Cosmos (Your DApp Mission)',
+//             description: 'Plan and build your own Anchor-powered DApp!',
+//             chapter: 11,
+//             order: 1,
+//             difficulty: 'advanced',
+//             estimatedTime: 180,
+//             storyText: `
+//       Captain, your training is complete and the galaxy awaits your innovation! 🚀
       
-      Your final mission is a test of all your skills: design and build a real **Anchor-powered DApp** that solves a problem or serves a need for explorers across Solana’s universe.
+//       Your final mission is a test of all your skills: design and build a real **Anchor-powered DApp** that solves a problem or serves a need for explorers across Solana’s universe.
       
-      It could be anything: a token vending machine, NFT mint pass, decentralized voting system, or something uniquely yours!
+//       It could be anything: a token vending machine, NFT mint pass, decentralized voting system, or something uniquely yours!
       
-      ---
+//       ---
       
-      ## How to Approach This Mission
+//       ## How to Approach This Mission
       
-      1. **Design your program:** Plan your accounts, instructions, and how users will interact.
+//       1. **Design your program:** Plan your accounts, instructions, and how users will interact.
       
-      2. **Build your Rust program:** Use Anchor framework patterns you've mastered — with accounts, constraints, error handling, and instructions.
+//       2. **Build your Rust program:** Use Anchor framework patterns you've mastered — with accounts, constraints, error handling, and instructions.
       
-      3. **Write client-side tests:** Use TypeScript to automate key tests with Anchor’s testing utilities.
+//       3. **Write client-side tests:** Use TypeScript to automate key tests with Anchor’s testing utilities.
       
-      4. **Deploy & demo:** Launch your program on Devnet, verify it works, and prepare to present your creation!
+//       4. **Deploy & demo:** Launch your program on Devnet, verify it works, and prepare to present your creation!
       
-      ---
+//       ---
       
-      Don’t worry — simplicity is strength. A single well-built instruction or account can be a powerful solution.
+//       Don’t worry — simplicity is strength. A single well-built instruction or account can be a powerful solution.
       
-      Most importantly, this mission is about **applying what you’ve learned** — so be creative and ambitious!
-      `,
-            objectives: [
-              'Design a Solana DApp with clear accounts and instruction flows',
-              'Implement a functional Anchor Rust program with proper constraints and logic',
-              'Write at least one automated TypeScript test exercising core functionality',
-              'Deploy your program to Devnet and prove it works in a live environment',
-              'Prepare a short presentation of your DApp’s purpose and capabilities'
-            ],
-            code: {
-              initial: `// Mission Commander: Time to lead this mission yourself!
-      // Start here by planning your Anchor program architecture:
-      //
-      // 1. Define your account data structures with #[account] and necessary fields
-      // 2. Write instructions with proper context structs and validation
-      // 3. Use Anchor macros for security: #[account(mut)], has_one, signers, etc.
-      // 4. Write TypeScript tests to call your instructions and verify behavior
-      //
-      // Example ideas to spark your creativity:
-      // - Token vending machine with payments & minting
-      // - On-chain voting with tally and status tracking
-      // - NFT mint pass with access controls
-      //
-      // Your code and tests will show your mastery!`,
-              solution: `// This final challenge is intentionally open-ended.
-      //
-      // Submit your fully working Anchor program (Rust + IDL), alongside your test scripts.
-      // Explain your DApp concept briefly: what problem it solves and how.
-      //
-      // For example, a simple Token Vending Machine program could:
-      //
-      // - Hold a token mint and a treasury account
-      // - Accept payments and mint tokens on demand
-      // - Enforce payment checks, update counters, and emit events
-      //
-      // Your creative solution is your final mission success!
-      //`,
-              tests: [
-                {
-                  name: 'Have at least one passing test suite',
-                  description: 'Your project includes automated tests that run and pass on Anchor test framework.',
-                  check: 'Tests successfully call at least one program instruction and verify results.',
-                  points: 40
-                },
-                {
-                  name: 'Deployed program on Devnet',
-                  description: 'Successfully deploy your Anchor program to Solana Devnet and show the live Program ID.',
-                  check: 'Deployment completes, and you can interact with your deployed program on Devnet.',
-                  points: 30
-                },
-                {
-                  name: 'Present your concept and code',
-                  description: 'Prepare a summary of your program’s purpose, key features, and architecture.',
-                  check: 'Clear documentation or presentation including code snippets or screenshots.',
-                  points: 30
-                }
-              ]
-            },
-            hints: [
-              'Start small — it’s okay to build one instruction or account that shows your idea.',
-              'Use Anchor’s #[account] constraints to keep your program secure and organized.',
-              'TypeScript tests are your safety net — write at least one to automate verification.',
-              'Use the Anchor CLI extensively: build, test, and deploy your program confidently.',
-              'Ask mentors or community members for feedback as you build.',
-              'Keep your DApp focused — well-designed small solutions are better than overly large incomplete projects.'
-            ],
-            completed: false,
-            locked: false
-          }
-        ]
-      }
+//       Most importantly, this mission is about **applying what you’ve learned** — so be creative and ambitious!
+//       `,
+//             objectives: [
+//               'Design a Solana DApp with clear accounts and instruction flows',
+//               'Implement a functional Anchor Rust program with proper constraints and logic',
+//               'Write at least one automated TypeScript test exercising core functionality',
+//               'Deploy your program to Devnet and prove it works in a live environment',
+//               'Prepare a short presentation of your DApp’s purpose and capabilities'
+//             ],
+//             code: {
+//               initial: `// Mission Commander: Time to lead this mission yourself!
+//       // Start here by planning your Anchor program architecture:
+//       //
+//       // 1. Define your account data structures with #[account] and necessary fields
+//       // 2. Write instructions with proper context structs and validation
+//       // 3. Use Anchor macros for security: #[account(mut)], has_one, signers, etc.
+//       // 4. Write TypeScript tests to call your instructions and verify behavior
+//       //
+//       // Example ideas to spark your creativity:
+//       // - Token vending machine with payments & minting
+//       // - On-chain voting with tally and status tracking
+//       // - NFT mint pass with access controls
+//       //
+//       // Your code and tests will show your mastery!`,
+//               solution: `// Terminal Commands for Devnet Deployment:
+
+// // 1. Build your Anchor program
+// anchor build
+
+// // 2. Deploy to Devnet (not localhost)
+// anchor deploy --provider.cluster devnet
+
+// // 3. Find your deployed Program ID
+// cat target/idl/your_program.json | grep "programId"
+// // OR check your program's keypair file:
+// cat target/deploy/your_program-keypair.json
+
+// // 4. Verify on Solana Explorer
+// // Visit: https://explorer.solana.com/?cluster=devnet
+// // Search for your Program ID
+
+// // Example successful deployment output:
+// // Program Id: 7X8X8X8X8X8X8X8X8X8X8X8X8X8X8X8X8X8X8X8X
+
+// // NOTE: Make sure you have Devnet SOL in your wallet:
+// // solana airdrop 2 --url devnet
+
+// // Your DApp code example:
+// use anchor_lang::prelude::*;
+
+// declare_id!("11111111111111111111111111111111");
+
+// #[program]
+// pub mod my_dapp {
+//     use super::*;
+    
+//     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
+//         let account = &mut ctx.accounts.my_account;
+//         account.data = 42;
+//         msg!("DApp initialized successfully!");
+//         Ok(())
+//     }
+// }
+
+// #[derive(Accounts)]
+// pub struct Initialize<'info> {
+//     #[account(init, payer = user, space = 8 + 8)]
+//     pub my_account: Account<'info, MyAccount>,
+//     #[account(mut)]
+//     pub user: Signer<'info>,
+//     pub system_program: Program<'info, System>,
+// }
+
+// #[account]
+// pub struct MyAccount {
+//     pub data: u64,
+// }`,
+//               tests: [
+//                 {
+//                   name: 'Have at least one passing test suite',
+//                   description: 'Your project includes automated tests that run and pass on Anchor test framework.',
+//                   check: 'Tests successfully call at least one program instruction and verify results.',
+//                   points: 40
+//                 },
+//                 {
+//                   name: 'Deployed program on Devnet',
+//                   description: 'Successfully deploy your Anchor program to Solana Devnet and show the live Program ID.',
+//                   check: 'Deployment completes, and you can interact with your deployed program on Devnet.',
+//                   points: 30
+//                 },
+//                 {
+//                   name: 'Present your concept and code',
+//                   description: 'Prepare a summary of your program’s purpose, key features, and architecture.',
+//                   check: 'Clear documentation or presentation including code snippets or screenshots.',
+//                   points: 30
+//                 }
+//               ]
+//             },
+//             hints: [
+//               'Start small — it’s okay to build one instruction or account that shows your idea.',
+//               'Use Anchor’s #[account] constraints to keep your program secure and organized.',
+//               'TypeScript tests are your safety net — write at least one to automate verification.',
+//               'Use the Anchor CLI extensively: build, test, and deploy your program confidently.',
+//               'Ask mentors or community members for feedback as you build.',
+//               'Keep your DApp focused — well-designed small solutions are better than overly large incomplete projects.'
+//             ],
+//             completed: false,
+//             locked: false
+//           }
+//         ]
+//       }
 ];
 export const badges = [
     {
