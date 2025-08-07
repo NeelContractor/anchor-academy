@@ -4,7 +4,7 @@
 Powered by Anchor, Rust, and a custom in-browser code editor.
 
 ## TODO 
-- lesson 3, 5 are failing
+- improve lesson's content and correct progress bar
 - write tests and contains/ lessons have no concepts without teach anything directly takes to editor for coding challenges.
 - progress bar returning false data
 
