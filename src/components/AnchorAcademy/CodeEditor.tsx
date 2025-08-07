@@ -471,7 +471,7 @@ export const CodeEditor = ({ initialCode, solution, tests, onComplete, hints }: 
               <Button 
                 onClick={runCode} 
                 disabled={isRunning}
-                className="bg-gradient-ocean hover:bg-primary/90 text-primary-foreground shadow-ocean bg-white"
+                // className="bg-gradient-ocean hover:bg-primary/90 text-primary-foreground shadow-ocean"
               >
                 {isRunning ? '⚡ Running...' : '▶️ Run Code'}
               </Button>

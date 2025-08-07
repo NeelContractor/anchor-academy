@@ -7,6 +7,7 @@ import { ArrowLeft, BookOpen, Target, Clock, Trophy } from 'lucide-react';
 import { CodeEditor } from './CodeEditor';
 import { toast } from 'sonner';
 import { Lesson } from '../types/lessons';
+import { ThemeSelect } from '../theme-select';
 
 interface LessonViewProps {
   lesson: Lesson;
@@ -63,6 +64,7 @@ export const LessonView = ({ lesson, onBack, onComplete }: LessonViewProps) => {
                     </div>
                     
                     <div className="flex items-center gap-2 text-muted-foreground">
+                        <ThemeSelect />
                         <Clock className="w-4 h-4" />
                         <span className="text-sm">{lesson.estimatedTime} minutes</span>
                     </div>
@@ -128,7 +130,7 @@ export const LessonView = ({ lesson, onBack, onComplete }: LessonViewProps) => {
                             <div className="mt-8 pt-6 border-t border-primary/20">
                                 <Button 
                                     onClick={() => setCurrentTab('code')}
-                                    className="bg-gradient-ocean hover:bg-primary/90 text-primary-foreground shadow-ocean bg-white"
+                                    // className="bg-gradient-ocean hover:bg-primary/90 text-primary-foreground shadow-ocean "
                                 >
                                     Start Coding Challenge 🚀
                                 </Button>
