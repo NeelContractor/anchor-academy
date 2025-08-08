@@ -38,9 +38,16 @@ export const chapters: Chapter[] = [
             
             ### The Power of Immutability
             
-            In smart contracts, immutability prevents accidental state changes that could drain user funds. When you see \`let ship_name = "USS Solana"\`, you know that name will NEVER change throughout the program execution.
+            In smart contracts, immutability prevents accidental state changes that could drain user funds. When you see \`let ship_name = "USS Solana";\`, you know that name will NEVER change throughout the program execution.
+
+            in rust you define variables like above name of the variable \`ship_name\' and sign value to it with \`=\` and the value \`"USS Solana"\` and ends with \`;\`.
             
-            But when you need to modify data (like fuel levels during space travel), you explicitly opt-in with \`let mut fuel = 100\`.
+            But when you need to modify data (like fuel levels during space travel), you explicitly opt-in with \`let mut fuel = 100;\`.
+
+            ## Rust's data types:
+            - String and &str
+            - boolean (true and false)
+            - Unsigned Integer types (like, u8, u16, u32, u64, u128), Signed Integer types (like, i8, i16, i32, i64, i128) and Floating-Point types (like, f8, f16, f32, f64, f128)
             
             This isn't just syntax - it's Rust's way of making your intentions crystal clear to both the compiler and other developers!`,
                 objectives: [
@@ -240,6 +247,20 @@ export const chapters: Chapter[] = [
             fn function_name(param: Type) -> ReturnType {
                 // function body
                 result // implicit return (no semicolon)
+            }
+            \`\`\`
+
+            ## Control Flow in Rust
+
+            \`\`\`rust
+            fn main() {
+                let number = 3;
+
+                if number < 5 {
+                    println!("condition was true");
+                } else {
+                    println!("condition was false");
+                }
             }
             \`\`\`
             
@@ -593,6 +614,91 @@ export const chapters: Chapter[] = [
     - **Programs store no state**—all state lives in separate accounts they own
     - **Rent:** Solana requires accounts to pay rent to cover the cost of storage (unless made rent-exempt)
     - **Parallelism:** Multiple transactions can modify separate accounts *simultaneously*—speeding up the Solana chain
+
+\`\`\`rust
+use anchor_lang::prelude::*;
+ 
+declare_id!("11111111111111111111111111111111");
+
+#[program]
+mod hello_anchor {
+    use super::*;
+    
+    pub fn initialize(ctx: Context<Initialize>, data: u64) -> Result<()> {
+        ctx.accounts.new_account.data = data;
+        msg!("Changed data to: {}!", data);
+        Ok(())
+    }
+}
+ 
+#[derive(Accounts)]
+pub struct Initialize<'info> {
+    #[account(init, payer = signer, space = 8 + 8)]
+    pub new_account: Account<'info, NewAccount>,
+    #[account(mut)]
+    pub signer: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+ 
+#[account]
+pub struct NewAccount {
+    data: u64,
+}
+\`\`\`
+
+\`use\` keyword is used to import things. here we are importing anchor_lang functionaliys
+
+The \`declare_id\` macro specifies the on-chain address of the program, known as the program ID.
+
+The \`#[program]\` attribute annotates the module containing all the instruction handlers for your program. Each public function within this module corresponds to an instruction that can be invoked.
+
+Instruction handlers are functions that define the logic executed when an instruction is invoked. The first parameter of each handler is a \`Context<T>\` type, where T is a struct implementing the Accounts trait and specifies the accounts the instruction requires.
+
+The \`Context\` fields can be accessed in an instruction using dot notation:
+
+- ctx.accounts: The accounts required for the instruction
+- ctx.program_id: The program's public key (address)
+- ctx.remaining_accounts: Additional accounts not specified in the Accounts struct.
+- ctx.bumps: Bump seeds for any Program Derived Address (PDA) accounts specified in the Accounts struct.
+
+The \`#[derive(Accounts)]\` macro is applied to a struct to specify the accounts that must be provided when an instruction is invoked. This macro implements the Accounts trait, which simplifies account validation and serialization and deserialization of account data.
+
+Account Constraints: Constraints define additional conditions that an account must satisfy to be considered valid for the instruction. Constraints are applied using the \`#[account(..)]\` attribute, which is placed above a field in a struct that implements the Accounts trait.
+
+When an instruction in an Anchor program is invoked, the program first validates the accounts provided before executing the instruction's logic. After validation, these accounts can be accessed within the instruction using the \`ctx.accounts\` syntax.
+
+The \`#[account]\` attribute is applied to structs that define the structure of the data stored in custom accounts created by your program.
+
+\`\`\`rust
+#[account]
+pub struct Example {
+    pub item_1: u32,         
+    pub item_2: Pubkey,      
+    pub item_3: String,      
+    pub item_4: f32,      
+    pub item_5: bool,      
+}
+\`\`\`
+
+### Account Space
+Reference guide for calculating account data size (bytes) requirements by Rust type
+\`\`\`table
+Types	    Space in bytes	        Details/Example
+bool	        1	            would only require 1 bit but still uses 1 byte
+u8/i8	        1	
+u16/i16	        2	
+u32/i32	        4	
+u64/i64	        8	
+u128/i128	    16	
+[T;amount]	space(T) * amount	    e.g. space([u16;32]) = 2 * 32 = 64
+Pubkey	        32	
+Vec<T>	    4 + (space(T) * amount)	
+String	    4 + length of string in bytes	
+Option<T>	1 + (space(T))	
+Enum	    1 + Largest Variant Size	e.g. Enum { A, B { val: u8 }, C { val: u16 } } -> 1 + space(u16) = 3
+f32	            4	                serialization will fail for NaN
+f64	            8	                serialization will fail for NaN
+\`\`\`
     
     Understanding and managing accounts is mission-critical for every Anchor developer!`,
                 objectives: [
@@ -839,8 +945,6 @@ export const chapters: Chapter[] = [
     
     You'll design, validate, and operate a "Mission Management" system, where astronauts and ground control coordinate cosmic adventures, and security is mission-critical.
     
-    ---
-    
     ### Anchor Controls: Program Anatomy
     
     \`\`\`rust
@@ -852,11 +956,37 @@ export const chapters: Chapter[] = [
     }
     \`\`\`
     
-    - *Each function is an instruction (on-chain entrypoint)*
-    - *Each Context<> struct defines which accounts get access*
-    - *Each #[account] struct stores your program's data on Solana!*
-    
-    ---
+    - Each function is an instruction (on-chain entrypoint)
+    - Each Context<> struct defines which accounts get access
+    - Each #[account] struct stores your program's data on Solana!
+
+    ### Account Types
+
+    Account<'info, T>
+    Description: Account container that checks ownership on deserialization
+
+    Signer<'info>
+    Description: Type validating that the account signed the transaction
+
+    Program<'info, T>
+    Description: Type validating that the account is the given Program
+
+    Box<Account<'info, T>>
+    Description: Box type to save stack space
+
+    ### Account Constraints
+
+    #[account(mut)]
+    Description: Checks the given account is mutable. Makes anchor persist any state changes.
+
+    #[account(init)]
+    Description: Creates the account via a CPI to the system program and initializes it (sets its account discriminator).
+
+    #[account(seeds, bump)]
+    Description: Checks that given account is a PDA derived from the currently executing program, the seeds, and if provided, the bump.
+
+    #[account(has_one = target)]
+    Description: Checks the target field on the account matches the key of the target field in the Accounts struct.
     
     Let's build a real space mission manager!
     `,
@@ -1359,7 +1489,10 @@ pub enum MissionError {
     - Mimics Mainnet—perfect training for live missions
     - Explore your program on explorer.solana.com
     
-    ---
+    first you need some Devnet Tokens from https://faucet.solana.com/
+
+    first comment you need to run is \`anchor build\` in terminal. it will create target folder which will have something.ts types file and something.json IDL file.
+    then you deploy it by running anchor \`anchor deploy --provider.cluster devnet\`, it will deploy the program to devnet.
     
     **Launch Sequence: The Steps**
     
@@ -1460,13 +1593,19 @@ pub enum MissionError {
     Solana’s **Program Derived Addresses (PDAs)** are cryptographically-secure, program-owned addresses you can deterministically derive using seeds.  
     This allows you to create and control accounts for each user, secured by your program logic (not any private key!).  
     
-    ---
-    
     ## Why PDAs?
     
     - **Security:** Only your program can sign for PDAs—no private keys.
     - **Predictability:** The address is always calculable from seeds (e.g., same user always gets the same PDA for their "Ship").
     - **Authorization:** Only your program can create, update, or sign for those addresses.
+\`\`\`rust
+     #[account(
+        // define the seeds to derive the PDA
+        seeds = [b"data", user.key().as_ref()],
+        // use the canonical bump
+        bump,
+    )]
+\`\`\`
     
     Let’s learn to generate these cosmic coordinates!
     `,
@@ -1587,13 +1726,31 @@ pub struct Initialize<'info> {
     
     With the **SPL Token program** (and the powerful Anchor SPL library), you can mint, send, and track tokens just like any real Solana project.
     
-    ---
-    
     ## SPL Tokens & Anchor
     
     - **Token Mint:** The source of a new fungible token. (Think: energy cell generator)
     - **Token Account:** Holds the balance for a single user/address.
     - **Authority:** Only the mint authority can create new tokens.
+
+    \`\`\`rust
+    use anchor_spl::token::{Mint, Token, TokenAccount};
+    
+    #[derive(Accounts)]
+    pub struct SplTokenExample<'info> {
+        #[account(mut)]
+        pub mint: Account<'info, Mint>,              // Token mint (must be mutable)
+        #[account(mut)]
+        pub to_ata: Account<'info, TokenAccount>,        // Receiving token account (must be mutable)
+        pub authority: Signer<'info>,                // The mint authority (must sign)
+        pub token_program: Program<'info, Token>,    // Anchor SPL Token program
+    }
+    \`\`\`
+
+    You need to import a few things from anchor_spl.
+    First is Mint — this represents the mint address of the token. For example, here we are using the mint address of the token we want to transfer.
+    Next is to_ata, which is the Associated Token Account (ATA) of the person to whom we want to send tokens.
+    Then comes authority, which is the person who wants to send the tokens and is also the signer of the transaction.
+    Lastly, we have token_program, which will be used to transfer the tokens.
     
     You’ll mint tokens, transfer them, and check balances, all using secure, ergonomic Anchor SPL patterns!
     `,
@@ -1715,8 +1872,53 @@ pub struct Initialize<'info> {
     Your ship is ready for interstellar communication: you'll use **Cross-Program Invocations (CPI)** to call another on-chain program, enabling next-generation composability on Solana!
     
     With CPI, you can invoke functions in system programs or other Anchor contracts—securely and atomically. A common real-world example is transferring tokens using the SPL Token program.
-    
-    ---
+
+    Uses Anchor's CpiContext and helper function to construct the CPI instruction.
+
+    CPI without signer → Call another program’s instruction when your program does not need to prove ownership of the source account — you simply pass the required accounts.
+    \`\`\`rust
+    pub fn sol_transfer(ctx: Context<SolTransfer>, amount: u64) -> Result<()> {
+        let from_pubkey = ctx.accounts.sender.to_account_info();
+        let to_pubkey = ctx.accounts.recipient.to_account_info();
+        let program_id = ctx.accounts.system_program.to_account_info();
+
+        let cpi_context = CpiContext::new(
+            program_id,
+            Transfer {
+                from: from_pubkey,
+                to: to_pubkey,
+            },
+        );
+
+        transfer(cpi_context, amount)?;
+        Ok(())
+    }
+    \`\`\`
+
+    CPI with signer → Call another program’s instruction and prove authority by signing with your program’s PDA (in Anchor, done via .with_signer).
+    \`\`\`rust
+    pub fn sol_transfer(ctx: Context<SolTransfer>, amount: u64) -> Result<()> {
+        let from_pubkey = ctx.accounts.pda_account.to_account_info();
+        let to_pubkey = ctx.accounts.recipient.to_account_info();
+        let program_id = ctx.accounts.system_program.to_account_info();
+
+        let seed = to_pubkey.key();
+        let bump_seed = ctx.bumps.pda_account;
+        let signer_seeds: &[&[&[u8]]] = &[&[b"pda", seed.as_ref(), &[bump_seed]]];
+
+        let cpi_context = CpiContext::new(
+            program_id,
+            Transfer {
+                from: from_pubkey,
+                to: to_pubkey,
+            },
+        )
+        .with_signer(signer_seeds);
+
+        transfer(cpi_context, amount)?;
+        Ok(())
+    }
+    \`\`\`
     
     ## How CPI Works in Anchor
     
@@ -1842,7 +2044,15 @@ pub struct Initialize<'info> {
       
       In Solana smart contracts, Anchor provides powerful **access control via account constraints** to enforce exactly who can call which instructions.
       
-      ---
+        #[account(has_one = target)]
+        Description: Checks the target field on the account matches the key of the target field in the Accounts struct.
+
+        \`\`\`rust
+        #[derive(Accounts)]
+        pub struct SomeThing<'info> {
+            pub authroity: Signer<'info>,
+        }
+        \`\`\`
       
       ## Key Access Control Patterns
       
@@ -1952,8 +2162,12 @@ pub struct Initialize<'info> {
       
       Suit up and dive into debugging mode to find and fix the problem before it's too late!
       
-      ---
-      
+      \`\`\`rust
+      let mut x = 10;
+      x += 10;
+      println!("{}", x); // outputs 20
+      \`\`\`
+
       ## Common Debugging Tips
       
       - Make sure you have a mutable reference to the account when changing its fields.

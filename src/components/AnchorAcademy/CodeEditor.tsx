@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { useTheme } from 'next-themes';
 
 interface TestCase {
   name: string;
@@ -27,6 +28,7 @@ export const CodeEditor = ({ initialCode, solution, tests, onComplete, hints }: 
   const [showHints, setShowHints] = useState(false);
   const [hintIndex, setHintIndex] = useState(0);
   const editorRef = useRef<any>(null);
+  const { theme } = useTheme();
 
   const handleEditorMount = (editor: any) => {
     editorRef.current = editor;
@@ -448,7 +450,8 @@ export const CodeEditor = ({ initialCode, solution, tests, onComplete, hints }: 
               value={code}
               onChange={(value) => setCode(value || '')}
               onMount={handleEditorMount}
-              theme="vs-dark"
+              // theme="vs-dark"
+              theme={theme == "dark" ? "vs-dark" : "vs-light" }
               options={{
                 minimap: { enabled: false },
                 fontSize: 14,

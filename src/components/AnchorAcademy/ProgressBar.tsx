@@ -11,9 +11,18 @@ interface ProgressBarProps {
 }
 
 export const ProgressBar = ({ xp, level, streak, completedLessons, totalLessons }: ProgressBarProps) => {
-    const xpToNextLevel = (level + 1) * 100;
-    const currentLevelXp = xp - (level * 100);
-    const progressToNextLevel = (currentLevelXp / xpToNextLevel) * 100;
+    // Fix 1: Calculate XP needed for next level correctly
+    const xpToNextLevel = 100; // XP needed to level up (always 100)
+    
+    // Fix 2: Calculate current level XP properly
+    const currentLevelXp = xp % 100; // Remainder gives current level progress
+    
+    // Fix 3: Fix the progress percentage calculation
+    const progressToNextLevel = Math.max(0, (currentLevelXp / xpToNextLevel) * 100);
+    
+    // Fix 4: Handle edge cases for display
+    const displayCurrentLevelXp = Math.max(0, currentLevelXp);
+    const displayProgressPercentage = Math.min(100, Math.max(0, progressToNextLevel));
 
     return (
         <div className="bg-card border rounded-lg p-4 shadow-elegant">
@@ -25,7 +34,7 @@ export const ProgressBar = ({ xp, level, streak, completedLessons, totalLessons 
                         </div>
                         <div>
                             <h3 className="font-semibold text-foreground">Astronaut Level {level}</h3>
-                            <p className="text-sm text-muted-foreground">{currentLevelXp}/{xpToNextLevel} XP</p>
+                            <p className="text-sm text-muted-foreground">{displayCurrentLevelXp}/{xpToNextLevel} XP</p>
                         </div>
                     </div>
                     
@@ -42,7 +51,7 @@ export const ProgressBar = ({ xp, level, streak, completedLessons, totalLessons 
                         
                         <Badge variant="outline" className="bg-primary/10 border-primary/20">
                             <Star className="w-4 h-4 mr-1 text-primary" />
-                            {xp} XP
+                            {Math.max(0, xp)} XP
                         </Badge>
                     </div>
                 </div>
@@ -51,11 +60,11 @@ export const ProgressBar = ({ xp, level, streak, completedLessons, totalLessons 
             <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Progress to next level</span>
-                    <span className="font-medium text-foreground">{Math.round(progressToNextLevel)}%</span>
+                    <span className="font-medium text-foreground">{Math.round(displayProgressPercentage)}%</span>
                 </div>
                 
-                <Progress 
-                    value={progressToNextLevel} 
+                <Progress
+                    value={displayProgressPercentage}
                     className="h-3 bg-muted/30"
                 />
             </div>
