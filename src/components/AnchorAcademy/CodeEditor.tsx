@@ -27,10 +27,12 @@ export const CodeEditor = ({ initialCode, solution, tests, onComplete, hints }: 
   const [output, setOutput] = useState<string>('');
   const [showHints, setShowHints] = useState(false);
   const [hintIndex, setHintIndex] = useState(0);
-  const editorRef = useRef<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const editorRef = useRef<any>(null); 
   const { theme } = useTheme();
 
-  const handleEditorMount = (editor: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleEditorMount = (editor: any) => { 
     editorRef.current = editor;
     
     // Configure Rust language support
@@ -66,12 +68,12 @@ export const CodeEditor = ({ initialCode, solution, tests, onComplete, hints }: 
         const passedPoints = passedTests.reduce((sum, index) => sum + tests[index].points, 0);
         const totalPoints = tests.reduce((sum, test) => sum + test.points, 0);
         
-        const failedTestMessages = failedTests.map((test, index) => 
+        const failedTestMessages = failedTests.map((test) => 
           `• ${test.name}: ${test.description}`
         ).join('\n');
         
         // Debug information for failed tests
-        const debugInfo = failedTests.map((test, index) => {
+        const debugInfo = failedTests.map((test) => { 
           const debugResult = debugTestCase(code, test);
           return `  Debug ${test.name}: ${debugResult}`;
         }).join('\n');
@@ -84,7 +86,8 @@ export const CodeEditor = ({ initialCode, solution, tests, onComplete, hints }: 
         );
         toast.error('Some tests failed. Check the hints!');
       }
-    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {  
       setOutput(prev => prev + '❌ Compilation failed. Check your syntax!');
       toast.error('Code compilation failed');
     } finally {
@@ -142,7 +145,7 @@ export const CodeEditor = ({ initialCode, solution, tests, onComplete, hints }: 
 
   const runTestCase = (userCode: string, test: TestCase): boolean => {
     // Normalize code for easier pattern matching
-    const normalizedCode = userCode.replace(/\s+/g, ' ').toLowerCase();
+    // const normalizedCode = userCode.replace(/\s+/g, ' ').toLowerCase();
     const testName = test.name.toLowerCase();
     
     try {

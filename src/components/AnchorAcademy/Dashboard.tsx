@@ -189,7 +189,7 @@ export default function Dashboard() {
                                     🌟 Excellent progress, Space Cadet!
                                 </h3>
                                 <p className="text-muted-foreground">
-                                    You've completed {userProgress.completedLessons.length} missions. 
+                                    You&apos;ve completed {userProgress.completedLessons.length} missions. 
                                     Ready for your next galactic challenge?
                                 </p>
                             </div>

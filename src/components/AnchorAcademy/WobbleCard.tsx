@@ -2,6 +2,7 @@
 
 import React from "react";
 import { WobbleCard } from "../ui/wobble-card";
+import Image from "next/image";
 
 export function WobbleCardDemo() {
   return (
@@ -18,7 +19,7 @@ export function WobbleCardDemo() {
             Write and test real Rust code with our advanced space-grade editor
           </p>
         </div>
-        <img
+        <Image
           src="/anchor-academy.png"
           width={500}
           height={500}
@@ -43,7 +44,7 @@ export function WobbleCardDemo() {
             Learn by building real Anchor programs and launching Solana applications
           </p>
         </div>
-        <img
+        <Image
           src="/anchor-academy-image.png"
           width={500}
           height={500}

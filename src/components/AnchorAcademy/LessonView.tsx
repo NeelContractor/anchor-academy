@@ -53,7 +53,7 @@ const MarkdownRenderer = ({ content }: { content: string }) => {
       }
       
       // Process regular markdown
-      let processedLine = line;
+      const processedLine = line;
       
       // Headers (check in order: ###, ##, # to avoid conflicts)
       if (line.trim().startsWith('### ')) {
@@ -345,7 +345,7 @@ export const LessonView = ({ lesson, onBack, onComplete }: LessonViewProps) => {
                         </Card>
                         
                         <Card className="p-6 border-muted/20">
-                            <h3 className="font-semibold mb-4 text-foreground">💡 What you'll learn</h3>
+                            <h3 className="font-semibold mb-4 text-foreground">💡 What you&apos;ll learn</h3>
                             <p className="text-sm text-muted-foreground leading-relaxed">
                                 This lesson will teach you fundamental concepts that are essential for your journey 
                                 in Anchor development. Take your time to understand each concept before moving on!
