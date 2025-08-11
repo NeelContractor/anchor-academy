@@ -17,37 +17,34 @@ export const chapters: Chapter[] = [
                 order: 1,
                 difficulty: 'beginner',
                 estimatedTime: 25,
-                storyText: `Welcome to the Anchor Academy, Space Cadet! 🚀
-            
+                storyText: `
+                **Welcome to the Anchor Academy, Space Cadet!** 🚀
+
             You've just enlisted in Commander Rust's elite crew aboard the starship Solana.
             Your first mission: learn how Rust handles data storage — a vital skill for writing secure, reliable smart contracts in the blockchain galaxy.
             
             ## Why Rust for Blockchain?
-            
             Rust was chosen for Solana because it offers **memory safety** without relying on garbage collection.
-            In the high-stakes world of blockchain, even a single bug can result in lost funds. Rust’s powerful compile-time checks help prevent catastrophic mistakes like:
-
-            - 🛡️ **Buffer overflows** – writing beyond allocated memory
-            - ⚡ **Use-after-free errors** – using memory after it’s been freed
-            - 🔒 **Data races** – unsafe simultaneous access in multi-threaded code
-            - 🔧 **Memory leaks** – unused memory that’s never released
+            In the high-stakes world of blockchain, even a single bug can result in lost funds. Rust's powerful compile-time checks help prevent catastrophic mistakes like:
+            - 🛡️ **Buffer overflows** - writing beyond allocated memory
+            - ⚡ **Use-after-free errors** - using memory after it's been freed
+            - 🔒 **Data races** - unsafe simultaneous access in multi-threaded code
+            - 🔧 **Memory leaks** - unused memory that's never released
             
             ## Rust's Golden Rules of Variables:
-            
             🔒 **Immutable by default**: Variables cannot be changed unless explicitly marked as mutable
             🔑 **Explicit mutability**: Use \`mut\` keyword when you need to modify data
             🛡️ **Type safety**: Rust knows what kind of data you're storing and prevents type errors
             ⚡ **Zero-cost abstractions**: Safety doesn't sacrifice performance
             
-            ### The Power of Immutability
-            
+            ## The Power of Immutability
             In smart contracts, immutability is your shield against accidental state changes that could drain user funds.
             For example:
             \`\`\`rust
-            let ship_name = "USS Solana";
+let ship_name = "USS Solana";
             \`\`\`
 
-            This means the ship’s name will never change during the program’s execution.
+            This means the ship's name will never change during the program's execution.
 
             In Rust, you define variables with:
             The \`let\` keyword
@@ -65,10 +62,10 @@ export const chapters: Chapter[] = [
             - Unsigned integers (\`u8\`, \`u16\`, \`u32\`, \`u64\`, \`u128\`)
             - Signed integers (\`i8\`, \`i16\`, \`i32\`, \`i64\`, \`i128\`)
             - Floating-point numbers (\`f32\`, \`f64\`)
-            (Note: Rust doesn’t have \`f8\`, \`f16\`, or \`f128\` in standard usage — only \`f32\` and \`f64\`.)
+            (Note: Rust doesn't have \`f8\`, \`f16\`, or \`f128\` in standard usage — only \`f32\` and \`f64\`.)
             
-            ## Commander’s Tip:
-            This isn’t just about syntax — it’s Rust’s way of making your intentions crystal clear to both the compiler and your fellow space engineers.`,
+            ## Commander's Tip:
+            This isn't just about syntax — it's Rust's way of making your intentions crystal clear to both the compiler and your fellow space engineers.`,
                 objectives: [
                     'Understand why immutability by default prevents bugs in smart contracts',
                     'Use let vs let mut appropriately based on data modification needs',
@@ -251,7 +248,7 @@ export const chapters: Chapter[] = [
                 difficulty: 'beginner',
                 estimatedTime: 30,
                 storyText: `Outstanding work managing ship data, Cadet! 🚀
-                You’ve proven yourself in handling ship variables. Now it’s time to learn about functions — the command protocols that keep your code organized, reusable, and mission-ready.
+                You've proven yourself in handling ship variables. Now it's time to learn about functions — the command protocols that keep your code organized, reusable, and mission-ready.
             
             ## Why Functions Matter in Smart Contracts
             On a space mission, you rely on standardized procedures to handle recurring tasks — docking maneuvers, system checks, emergency responses.
@@ -263,31 +260,28 @@ export const chapters: Chapter[] = [
             - 🛡️ **Type safety**: Rust ensures you pass and return the correct data types
             
             ## Function Anatomy in Rust
-            
             \`\`\`rust
-            fn function_name(param: Type) -> ReturnType {
-                // function body
-                result // implicit return (no semicolon)
-            }
+fn function_name(param: Type) -> ReturnType {
+    // function body
+    result // implicit return (no semicolon)
+}
             \`\`\`
 
             ## Control Flow in Rust
             Functions often work with control flow statements like \`if\`, \`else\`, and loops to make decisions:
-
             \`\`\`rust
-            fn main() {
-                let number = 3;
+fn main() {
+    let number = 3;
 
-                if number < 5 {
-                    println!("Condition was true");
-                } else {
-                    println!("Condition was false");
-                }
-            }
+    if number < 5 {
+        println!("Condition was true");
+    } else {
+        println!("Condition was false");
+    }
+}
             \`\`\`
             
             ## Key Concepts:
-            
             - 🎯 **Function signature**: Defines name, parameters, and return type
             - 📦 **Parameters**: Input values with explicit types (\`x: i32\`)
             - 🔄 **Return values**: Declared with \`-> Type\` to specify what the function outputs
@@ -295,7 +289,6 @@ export const chapters: Chapter[] = [
             - 🔧 **Explicit returns**: Use \`return value;\` for early exits from a function
             
             ## Real-World (or Real-Space) Application
-            
             Think of functions as mission protocols:
             - 🛰️ "Navigation Protocol Alpha" - Takes coordinates → returns optimal flight path
             - 📦 "Resource Check Protocol" - Takes current supplies → returns status report
@@ -619,20 +612,17 @@ export const chapters: Chapter[] = [
                 estimatedTime: 30,
                 storyText: `**Congratulations, Chief Engineer!** 🛰️  
                 
-    You’ve been promoted to oversee the entire account system of the starship Solana.
+    You've been promoted to oversee the entire account system of the starship Solana.
     In the blockchain galaxy, accounts are the space stations — hubs where all mission-critical data is stored.
     
     ## The Solana Account Universe
-    
     On Solana, **code** (programs) and **data** (accounts) live separately:
-    
     - 🧑‍🚀 **Programs:** - Your smart contracts: immutable code, deployed once and forever
     - 🛰️ **Accounts:** - Flexible data containers that store the state your program uses
     - 🗺️ **Addresses:** - Every account and program has a unique **32-byte (256-bit)** address
     - 🔑 **Ownership:** - Each account is owned by exactly **one program**
     
     ### Core Account Concepts
-    
     - **Everything is an account** — programs, wallets, tokens, storage — all follow the same account structure
     - **Programs store no state** — they only execute logic; all state lives in accounts they own
     - **Rent** — Accounts pay rent to remain on-chain (unless rent-exempt)
@@ -640,38 +630,37 @@ export const chapters: Chapter[] = [
 
     Example: An Account in Anchor
 \`\`\`rust
-use anchor_lang::prelude::*;
- 
-declare_id!("11111111111111111111111111111111");
-
-#[program]
-mod hello_anchor {
-    use super::*;
+    use anchor_lang::prelude::*;
     
-    pub fn initialize(ctx: Context<Initialize>, data: u64) -> Result<()> {
-        ctx.accounts.new_account.data = data;
-        msg!("Changed data to: {}!", data);
-        Ok(())
+    declare_id!("11111111111111111111111111111111");
+
+    #[program]
+    mod hello_anchor {
+        use super::*;
+        
+        pub fn initialize(ctx: Context<Initialize>, data: u64) -> Result<()> {
+            ctx.accounts.new_account.data = data;
+            msg!("Changed data to: {}!", data);
+            Ok(())
+        }
     }
-}
- 
-#[derive(Accounts)]
-pub struct Initialize<'info> {
-    #[account(init, payer = signer, space = 8 + 8)]
-    pub new_account: Account<'info, NewAccount>,
-    #[account(mut)]
-    pub signer: Signer<'info>,
-    pub system_program: Program<'info, System>,
-}
- 
-#[account]
-pub struct NewAccount {
-    data: u64,
-}
+    
+    #[derive(Accounts)]
+    pub struct Initialize<'info> {
+        #[account(init, payer = signer, space = 8 + 8)]
+        pub new_account: Account<'info, NewAccount>,
+        #[account(mut)]
+        pub signer: Signer<'info>,
+        pub system_program: Program<'info, System>,
+    }
+    
+    #[account]
+    pub struct NewAccount {
+        data: u64,
+    }
 \`\`\`
 
 ## Breaking It Down
-
 - \`use\` - Imports functionality from the \`anchor_lang\` library
 - \`declare_id!\` - Specifies the program ID (on-chain address of the program)
 - \`#[program]\` - Marks the module containing all instruction handlers
@@ -679,14 +668,12 @@ pub struct NewAccount {
 - \`Context<T>\` - First parameter in every handler; specifies the accounts required for the instruction
 
 ## Accessing Context Fields
-
 - \`ctx.accounts\` - The accounts required for the instruction
-- \`ctx.program_id\` - The program’s public key
+- \`ctx.program_id\` - The program's public key
 - \`ctx.remaining_accounts\` - Any extra accounts passed in
 - \`ctx.bumps\` - Bump seeds for any Program Derived Address (PDA) accounts
 
 \`#[derive(Accounts)]\`
-
 This macro defines which accounts must be passed into the instruction and validates them before execution.
 Account constraints (e.g., \`#[account(mut)]\`, \`#[account(init)])\` are added above each field to enforce rules like mutability or initialization.
 
@@ -694,39 +681,39 @@ Account constraints (e.g., \`#[account(mut)]\`, \`#[account(init)])\` are added 
 Applied to structs that define custom account data stored on-chain:
 
 \`\`\`rust
-#[account]
-pub struct Example {
-    pub item_1: u32,
-    pub item_2: Pubkey,
-    pub item_3: String,
-    pub item_4: f32,
-    pub item_5: bool,
-}
+    #[account]
+    pub struct Example {
+        pub item_1: u32,
+        pub item_2: Pubkey,
+        pub item_3: String,
+        pub item_4: f32,
+        pub item_5: bool,
+    }
 \`\`\`
 
 ### Account Space Calculation
 When creating an account, you must reserve enough space (in bytes) for its data:
 \`\`\`table
-**Types**	    **Space in bytes**	        **Details/Example**
-\`bool\`	        1	                Uses 1 byte (even though it's just 1 bit)
-\`u8/i8\`	        1	
-\`u16/i16\`	        2	
-\`u32/i32\`	        4	
-\`u64/i64\`	        8	
-\`u128/i128\`	    16	
-\`[T;n]\`	    space(T) × n	        Example: \`[u16; 32]\` → 2 × 32 = 64
-\`Pubkey\`	        32	
-\`Vec<T>\`	    4 + (space(T) × n)	    4 bytes for length prefix
-\`String\`	    4 + length in bytes	    4 bytes for length prefix
-\`Option<T>\`	1 + space(T)	        1 byte for presence flag
-\`Enum\`	    1 + largest variant size	Example: \`Enum { A, B { u8 }, C { u16 } }\` → 1 + 2 = 3
-\`f32\`	            4	                Cannot serialize\`NaN\`
-\`f64\`	            8	                Cannot serialize \`NaN\`
+Types	    Space in bytes	        Details/Example
+bool	        1	                Uses 1 byte (even though it's just 1 bit)
+u8/i8	        1	
+u16/i16	        2	
+u32/i32	        4	
+u64/i64	        8	
+u128/i128	    16	
+[T;n]	    space(T) x n	        Example: \`[u16; 32]\` → 2 x 32 = 64
+Pubkey	        32	
+Vec<T>	    4 + (space(T) x n)	    4 bytes for length prefix
+String	    4 + length in bytes	    4 bytes for length prefix
+Option<T>	1 + space(T)	        1 byte for presence flag
+Enum	    1 + largest variant size Example: \`Enum { A, B { u8 }, C { u16 } }\` → 1 + 2 = 3
+f32	            4	                Cannot serialize\`NaN\`
+f64	            8	                Cannot serialize \`NaN\`
 \`\`\`
     
     ## Mission Tip:
     Understanding and managing accounts is mission-critical for every Anchor developer.
-    They’re not just data containers — they’re the lifeblood of the Solana galaxy.`,
+    They're not just data containers — they're the lifeblood of the Solana galaxy.`,
                 objectives: [
                     'Understand Solana’s separation of code and data (accounts vs programs)',
                     'Define and allocate structured Anchor accounts for on-chain data',
@@ -957,18 +944,12 @@ When creating an account, you must reserve enough space (in bytes) for its data:
                 estimatedTime: 35,
                 storyText: `
     **Welcome, Flight Director!** 🌌
-    
     You're now in charge of **Space Mission Control** — building and operating a powerful on-chain Mission Manager using **Solana + Anchor**.
-
     This mission brings together everything you've learned about accounts — and now, you'll unlock the **full power of smart contract programming** itself.
-
     Your job?
     Coordinate astronauts, manage mission data, and enforce security in the vast blockchain galaxy.
     
-    ---
-    
     ## 👩‍🚀 What is an Anchor Program?
-
     An Anchor program is the brain of your Solana mission. It's made up of three key parts:
     - **Instructions:** - On-chain functions that act like API endpoints
     - **Context structs:** - Define which accounts each instruction needs (and who can access them)
@@ -977,7 +958,6 @@ When creating an account, you must reserve enough space (in bytes) for its data:
     In our **Mission Management System**, astronauts and ground control will send commands, store mission logs, and update states — all securely, all on-chain.
     
     ### 🚀 Anchor Program Anatomy
-    
     \`\`\`rust
     #[program]
     mod mission_control {
@@ -992,23 +972,21 @@ When creating an account, you must reserve enough space (in bytes) for its data:
     - **Each** \`#[account]\` **struct** defines custom on-chain data structures for your program
 
     ### 🛰️ Common Account Types
-
     \`\`\`table
-    **Type**	                **Description**
-    \`Account<'info, T>\`	    An account container that automatically checks ownership during deserialization
-    \`Signer<'info>\`	        Ensures that the account signed the transaction
-    \`Program<'info, T>\`	    Confirms that the account is a specific program
-    \`Box<Account<'info, T>>\`	Stores account data on the heap instead of the stack (saves stack space)
+    Type	                Description
+    Account<'info, T>	    An account container that automatically checks ownership during deserialization
+    Signer<'info>	        Ensures that the account signed the transaction
+    Program<'info, T>	    Confirms that the account is a specific program
+    Box<Account<'info, T>>	Stores account data on the heap instead of the stack (saves stack space)
     \`\`\`
 
     ### 🔒 Common Account Constraints
-
     \`\`\`table
-    **Attribute**	                    **Purpose**
-    \`#[account(mut)]\`	                Ensures the account is mutable and saves state changes
-    \`#[account(init)]\`	            reates a new account via CPI to the System Program and sets its discriminator
-    \`#[account(seeds, bump)]\`	        Verifies the account is a PDA derived from the program's seeds and bump
-    \`#[account(has_one = target)]\`	Ensures the account's target field matches the specified target account key
+    Attribute	                    Purpose
+    #[account(mut)]	                Ensures the account is mutable and saves state changes
+    #[account(init)]	            reates a new account via CPI to the System Program and sets its discriminator
+    #[account(seeds, bump)]	        Verifies the account is a PDA derived from the program's seeds and bump
+    #[account(has_one = target)]	Ensures the account's target field matches the specified target account key
     \`\`\`
     
     Let's build a real Space Mission Manager!
@@ -1506,7 +1484,7 @@ pub enum MissionError {
     **🚀 Final Countdown, Cadet — Prepare for Launch!**
      
     Your ship is mission-ready, and the engines are humming.
-    It’s time to launch your **Anchor smart contract** into the **Solana Devnet** — a public test galaxy where you can explore, experiment, and even make mistakes without losing real treasure.
+    It's time to launch your **Anchor smart contract** into the **Solana Devnet** — a public test galaxy where you can explore, experiment, and even make mistakes without losing real treasure.
     
     **🌌 Why Devnet?**
     - 🪙 **Free test tokens** (no real SOL required)
@@ -1520,7 +1498,7 @@ pub enum MissionError {
     ## 🛠 Step 2 — Build Your Program
     Run this in your terminal:
     \`\`\`bash
-    anchor build
+anchor build
     \`\`\`
     This will create a target/ folder containing:
     - \`something.ts\` → TypeScript definitions for your program
@@ -1529,9 +1507,8 @@ pub enum MissionError {
     ## 🚀 Step 3 — Deploy to Devnet
     Deploy with:
     \`\`\`bash
-    anchor deploy --provider.cluster devnet
+anchor deploy --provider.cluster devnet
     \`\`\`
-
     Anchor will:
     1. Upload your program to the Devnet cluster
     2. Assign it a **program ID**
@@ -1541,9 +1518,7 @@ pub enum MissionError {
     Once deployed, head to **explorer.solana.com**, switch to the Devnet network, and search for your program ID.
     If you see it there — congratulations, Cadet! You've successfully launched into the Devnet galaxy.
 
-    
     **Launch Sequence: The Steps**
-    
     You'll build and deploy your deployed program on Devnet. Let's blast off!
     `,
                 objectives: [
@@ -1636,17 +1611,13 @@ pub enum MissionError {
                 difficulty: 'advanced',
                 estimatedTime: 25,
                 storyText: `
-                :
         **🪐 Navigating Restricted Star Systems — PDAs**
     Your next voyage takes you into restricted star systems, where only travelers with the right coordinates can dock.
-
     On Solana, these coordinates are called **Program Derived Addresses (PDAs)** —
     cryptographically secure, program-owned addresses you can **deterministically derive** using **seeds**.
-
     Unlike wallet addresses, PDAs have **no private keys**. They're generated and authorized by your program logic.
     
     ## ✨ Why PDAs Exist
-    
     - **Security:** - Only your program can “sign” for PDAs. No private key exists to steal.
     - **Predictability:** - PDAs are derived from seeds. The same seeds will always generate the same PDA.
     - **Authorization:** - Only your program can create, update, or interact with PDA-owned accounts.
@@ -1654,12 +1625,12 @@ pub enum MissionError {
     ## 🧮 PDA Seeds Example
     In Anchor, you define a PDA like this:
 \`\`\`rust
-    #[account(
-        // Define the seeds used to derive the PDA
-        seeds = [b"data", user.key().as_ref()],
-        // Use the canonical bump (avoids collisions)
-        bump,
-    )]
+#[account(
+    // Define the seeds used to derive the PDA
+    seeds = [b"data", user.key().as_ref()],
+    // Use the canonical bump (avoids collisions)
+    bump,
+)]
 \`\`\`
 
     How it works:
@@ -1667,7 +1638,7 @@ pub enum MissionError {
     - \`user.key().as_ref()\` → The public key of the user as part of the derivation
     - \`bump\` → An extra byte that ensures the PDA lands on a valid curve point
     
-    Let’s learn to generate these cosmic coordinates!
+    Let's learn to generate these cosmic coordinates!
     `,
                 objectives: [
                     'Understand Solana PDA (Program Derived Address) concepts',
@@ -1783,33 +1754,32 @@ pub struct Initialize<'info> {
                 estimatedTime: 30,
                 storyText: `
                 **🚀 Fueling Your Starship — SPL Tokens**
+
     Your starship can't travel far without fuel.
     On Solana, **SPL tokens** are your energy cells — fungible tokens that represent the resources and rewards powering the decentralized galaxy.
-
     With the **SPL Token Program** (and the mighty **Anchor SPL library**), you can mint, send, and track tokens exactly like any real Solana project.
     
     ## ⚡ SPL Token Components
-    
     - 🔵 **Token Mint** - The origin of a new fungible token. (Think: your energy cell generator)
     - 💳 **Token Account (ATA)** - Holds the balance for a single user or address.
     - 🛡 **Authority** - The entity (or PDA) with permission to create new tokens.
 
     ## 🛰 Example: Anchor SPL Accounts
     \`\`\`rust
-    use anchor_spl::token::{Mint, Token, TokenAccount};
+use anchor_spl::token::{Mint, Token, TokenAccount};
 
-    #[derive(Accounts)]
-    pub struct SplTokenExample<'info> {
-        #[account(mut)]
-        pub mint: Account<'info, Mint>,           // Token mint (must be mutable)
-        
-        #[account(mut)]
-        pub to_ata: Account<'info, TokenAccount>, // Receiving token account (must be mutable)
-        
-        pub authority: Signer<'info>,             // Mint authority (must sign)
-        
-        pub token_program: Program<'info, Token>, // SPL Token program
-    }
+#[derive(Accounts)]
+pub struct SplTokenExample<'info> {
+    #[account(mut)]
+    pub mint: Account<'info, Mint>,           // Token mint (must be mutable)
+    
+    #[account(mut)]
+    pub to_ata: Account<'info, TokenAccount>, // Receiving token account (must be mutable)
+    
+    pub authority: Signer<'info>,             // Mint authority (must sign)
+    
+    pub token_program: Program<'info, Token>, // SPL Token program
+}
     \`\`\`
 
     ## 🛠 Field Breakdown
@@ -1936,10 +1906,10 @@ pub struct Initialize<'info> {
                 estimatedTime: 30,
                 storyText: `
                 📡 **Interstellar Communication — Cross-Program Invocations (CPI)**
+
     Your ship is now equipped for interstellar communication!
     With **Cross-Program Invocations (CPI)**, your program can call another on-chain program—unlocking next-generation composability on Solana.
-
-    Think of CPI as using your ship’s comms system to request help from another station—securely and instantly, without ever leaving orbit.
+    Think of CPI as using your ship's comms system to request help from another station—securely and instantly, without ever leaving orbit.
 
     ## 🚀 Why CPI Matters
     - 🔗 Composability: Call into system programs or other Anchor contracts.
@@ -1947,63 +1917,59 @@ pub struct Initialize<'info> {
     - 🌌 Real-world use case: Transferring SPL tokens using the SPL Token Program.
 
     ## CPI in Anchor
-
     Anchor provides the CpiContext helper to set up the CPI call, including:
     - The **destination program**
     - All **required accounts**
     - Optional **signers** (for PDA authority)
 
     **CPI Without Signer**
-    When your program doesn’t need to prove authority over the source account, simply pass the required accounts:
-
+    When your program doesn't need to prove authority over the source account, simply pass the required accounts:
     \`\`\`rust
-    pub fn sol_transfer(ctx: Context<SolTransfer>, amount: u64) -> Result<()> {
-        let from_pubkey = ctx.accounts.sender.to_account_info();
-        let to_pubkey = ctx.accounts.recipient.to_account_info();
-        let program_id = ctx.accounts.system_program.to_account_info();
+pub fn sol_transfer(ctx: Context<SolTransfer>, amount: u64) -> Result<()> {
+    let from_pubkey = ctx.accounts.sender.to_account_info();
+    let to_pubkey = ctx.accounts.recipient.to_account_info();
+    let program_id = ctx.accounts.system_program.to_account_info();
 
-        let cpi_context = CpiContext::new(
-            program_id,
-            Transfer {
-                from: from_pubkey,
-                to: to_pubkey,
-            },
-        );
+    let cpi_context = CpiContext::new(
+        program_id,
+        Transfer {
+            from: from_pubkey,
+            to: to_pubkey,
+        },
+    );
 
-        transfer(cpi_context, amount)?;
-        Ok(())
-    }
+    transfer(cpi_context, amount)?;
+    Ok(())
+}
     \`\`\`
 
     **CPI With Signer (PDA Authority)**
     When your program must sign using a Program Derived Address (PDA), use .with_signer:
-
     \`\`\`rust
-    pub fn sol_transfer(ctx: Context<SolTransfer>, amount: u64) -> Result<()> {
-        let from_pubkey = ctx.accounts.pda_account.to_account_info();
-        let to_pubkey = ctx.accounts.recipient.to_account_info();
-        let program_id = ctx.accounts.system_program.to_account_info();
+pub fn sol_transfer(ctx: Context<SolTransfer>, amount: u64) -> Result<()> {
+    let from_pubkey = ctx.accounts.pda_account.to_account_info();
+    let to_pubkey = ctx.accounts.recipient.to_account_info();
+    let program_id = ctx.accounts.system_program.to_account_info();
 
-        let seed = to_pubkey.key();
-        let bump_seed = ctx.bumps.pda_account;
-        let signer_seeds: &[&[&[u8]]] = &[&[b"pda", seed.as_ref(), &[bump_seed]]];
+    let seed = to_pubkey.key();
+    let bump_seed = ctx.bumps.pda_account;
+    let signer_seeds: &[&[&[u8]]] = &[&[b"pda", seed.as_ref(), &[bump_seed]]];
 
-        let cpi_context = CpiContext::new(
-            program_id,
-            Transfer {
-                from: from_pubkey,
-                to: to_pubkey,
-            },
-        )
-        .with_signer(signer_seeds);
+    let cpi_context = CpiContext::new(
+        program_id,
+        Transfer {
+            from: from_pubkey,
+            to: to_pubkey,
+        },
+    )
+    .with_signer(signer_seeds);
 
-        transfer(cpi_context, amount)?;
-        Ok(())
-    }
+    transfer(cpi_context, amount)?;
+    Ok(())
+}
     \`\`\`
     
     ## 🛰 How CPI Works in Anchor
-    
     - \`CpiContext\` → Bundles the destination program, accounts, and optional signers.
     - **Anchor SPL** → Includes pre-built CPI wrappers (e.g., \`transfer\`, \`mint_to\`) for common programs like SPL Token.
     - **Accounts** → You must provide all accounts required by the target program.
@@ -2123,28 +2089,26 @@ pub struct Initialize<'info> {
             estimatedTime: 20,
             storyText: `
             🛡 **Access Control — Only the Captain at the Helm**
+
         Welcome aboard, Commander!
         Your starship's critical systems—like navigation, shields, and warp drive—must only be accessible to **authorized crew members**.
-
         On Solana, **Anchor** provides powerful **access control via account constraints** so you can precisely enforce **who** can call **which** instructions.
 
         🔑 **Example: has_one Constraint**
-      
         \`\`\`rust
-        #[account(has_one = target)]
+#[account(has_one = target)]
         \`\`\`
         **Description:** Checks that the \`target\` field on an account matches the public key of the \`target\` account provided in your \`Accounts\` struct.
 
         📦 Basic Access Control with Signer
         \`\`\`rust
-        #[derive(Accounts)]
-        pub struct SomeThing<'info> {
-            pub authority: Signer<'info>, // Must sign the transaction
-        }
+#[derive(Accounts)]
+pub struct SomeThing<'info> {
+    pub authority: Signer<'info>, // Must sign the transaction
+}
         \`\`\`
       
       ## Key Access Control Patterns
-      
       - \`has_one\` **constraint** → Ensures a field in one account equals the key of another account.
       - \`Signer\` **constraint** → Requires the account to sign the transaction, proving authority.
       - **Combination** → Together, they guarantee only the authorized captain can modify ship state.
@@ -2248,13 +2212,13 @@ pub struct Initialize<'info> {
             estimatedTime: 25,
             storyText: `
             🚨 **Gravitational Anomaly Detected!**
+
         Your starship has been pulled into a strange gravitational field! At first glance, the fuel system code looks perfectly fine — yet, mysteriously, your ship's fuel gauge refuses to rise.
         Time to suit up and enter **debugging mode** to locate and fix the issue before the anomaly swallows us whole!
-      
         \`\`\`rust
-        let mut x = 10;
-        x += 10;
-        println!("{}", x); // outputs 20
+let mut x = 10;
+x += 10;
+println!("{}", x); // outputs 20
         \`\`\`
 
         ## 🛠 Common Debugging Tips
